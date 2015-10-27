@@ -2,11 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.smartlock" >
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <permission
+            android:name="com.android.smartlock.permission.C2D_MESSAGE"
+            android:protectionLevel="signature"/>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.android.smartlock.permission.C2D_MESSAGE"/>
 
     <application
         android:allowBackup="true"
@@ -23,14 +27,31 @@
             </intent-filter>
         </activity>
 
-        <!-- GCM receiver -->
         <receiver
-            android:name="com.android.smartlock.GCMReceiver" >
+                android:name="com.google.android.gms.gcm.GcmReceiver"
+                android:exported="true"
+                android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <category android:name="com.example.gcm" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+
+                <category android:name="com.android.smartlock"/>
             </intent-filter>
         </receiver>
 
+        <service
+                android:name=".MyGcmListenerService"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </service>
+        <service
+                android:name=".MyInstanceIDListenerService"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
