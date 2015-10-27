@@ -3,5 +3,4 @@
     <string name="enter_ip">Enter server local IP:</string>
     <string name="action_settings">Settings</string>
     <string name="button_ping">Ping</string>
-    <string name="default_ip">192.168.1.14</string>
 </resources>
