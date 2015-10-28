@@ -125,38 +125,37 @@ public class Lock extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Rect size = canvas.getClipBounds();
-        int width = Math.min(size.width(), size.height());
-        int height = width;
-        float centerX = width / 2.0f;
-        float centerY = height / 2.0f;
+        Rect dimensions = canvas.getClipBounds();
+        int size = Math.min(dimensions.width(), dimensions.height());
+        float centerX = size / 2.0f;
+        float centerY = size / 2.0f;
 
-        float lockHeight = height * 0.5f;
+        float lockHeight = size * 0.5f;
         float lockWidth = lockHeight * 2.0f / 3.0f;
         float lockLeftX = centerX - lockWidth / 2.0f;
         float lockRightX = centerX + lockWidth / 2.0f;
-        float lockTopY = centerY;
-        float lockBottomY = centerY + lockHeight / 2.0f;
+        float lockTopY = centerY - size * 0.075f;
+        float lockBottomY = lockTopY + lockHeight / 2.0f;
 
         float keyHoleX = centerX;
         float keyHoleY = (lockTopY + lockBottomY) / 2.0f;
         float keyHoleRadius = lockWidth * 0.1f;
 
-        float handleSideLength = height * 0.1f;
-        float handleSideBottomY = centerY;
-        float handleSideTopY = centerY - handleSideLength;
+        float handleSideLength = size * 0.1f;
+        float handleSideBottomY = lockTopY;
+        float handleSideTopY = lockTopY - handleSideLength;
         float handleSideLeftX = centerX - lockWidth * 0.25f;
         float handleSideRightX = centerX + lockWidth * 0.25f;
 
-        float handleArcLength = height * .075f;
+        float handleArcLength = size * .075f;
         float handleArcLeftX = handleSideLeftX;
         float handleArcRightX = handleSideRightX;
         float handleArcBottomY = handleSideTopY + handleArcLength;
         float handleArcTopY = handleSideTopY - handleArcLength;
 
-        float circleRadius = height * .675f / 2.0f;
+        float circleRadius = size * .675f / 2.0f;
         float circleX = centerX;
-        float circleY = lockTopY + ((lockBottomY - lockTopY) * 0.25f);
+        float circleY = centerY;
 
         canvas.drawCircle(circleX, circleY, circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
         canvas.drawRoundRect(lockLeftX, lockTopY, lockRightX, lockBottomY, 10, 10, mLockPaint);
