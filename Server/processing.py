@@ -1,4 +1,5 @@
 import logging
+import os
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from gcm import GCM
@@ -10,8 +11,10 @@ from MessageSender.message_sender import MessageSender
 DEFAULT_PROCESS_TIMEOUT = 1000
 PORT = 8000
 
-# TODO remove GCM key before commit
-GCM_KEY = ''
+GCM_ENV = 'GCM_KEY'
+GCM_KEY = os.getenv(GCM_ENV)
+if not GCM_KEY:
+    raise Exception('{} environment key not found.'.format(GCM_ENV))
 GCM = GCM(GCM_KEY)
 
 
