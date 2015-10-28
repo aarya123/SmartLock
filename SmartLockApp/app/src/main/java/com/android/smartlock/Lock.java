@@ -3,6 +3,7 @@ package com.android.smartlock;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -58,6 +59,7 @@ public class Lock extends View {
     public void setLockedColor(int mLockedColor) {
         boolean viewNeedsUpdating = mLockedColor != this.mLockedBackgroundColor;
         this.mLockedBackgroundColor = mLockedColor;
+        mLockedBackgroundPaint.setColor(mLockedBackgroundColor);
         if (viewNeedsUpdating) {
             invalidate();
             requestLayout();
@@ -71,6 +73,7 @@ public class Lock extends View {
     public void setUnlockedColor(int mUnlockedColor) {
         boolean viewNeedsUpdating = mUnlockedColor != this.mUnlockedBackgroundColor;
         this.mUnlockedBackgroundColor = mUnlockedColor;
+        mUnlockedBackgroundPaint.setColor(mUnlockedBackgroundColor);
         if (viewNeedsUpdating) {
             invalidate();
             requestLayout();
@@ -153,7 +156,7 @@ public class Lock extends View {
         float handleArcBottomY = handleSideTopY + handleArcLength;
         float handleArcTopY = handleSideTopY - handleArcLength;
 
-        float circleRadius = size * .675f / 2.0f;
+        float circleRadius = size / 2.0f;
         float circleX = centerX;
         float circleY = centerY;
 
@@ -167,12 +170,25 @@ public class Lock extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return mGestureDetector.onTouchEvent(event);
+        boolean result = mGestureDetector.onTouchEvent(event);
+        if (!result) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                //TODO:Make bg lighter
+                result = true;
+            }
+        }
+        return result;
     }
 
     class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
+            int color = Lock.this.isLocked() ? mLockedBackgroundColor : mUnlockedBackgroundColor;
+            double red = Color.red(color) * .75;
+            double green = Color.green(color) * .75;
+            double blue = Color.blue(color) * .75;
+
+            //TODO:Make bg darker
             return true;
         }
 
