@@ -112,8 +112,6 @@ public class Lock extends View {
         mLockedBackgroundPaint.setStyle(Paint.Style.FILL);
         mUnlockedBackgroundPaint.setStyle(Paint.Style.FILL);
 
-        mLockPaint.setStrokeWidth(10f);
-
         mGestureDetector = new GestureDetector(getContext(), new LockSimpleGestureListener());
     }
 
@@ -132,6 +130,7 @@ public class Lock extends View {
         int size = Math.min(dimensions.width(), dimensions.height());
         float centerX = size / 2.0f;
         float centerY = size / 2.0f;
+        float strokeWidth = size * 0.02f;
 
         float lockHeight = size * 0.5f;
         float lockWidth = lockHeight * 2.0f / 3.0f;
@@ -160,8 +159,10 @@ public class Lock extends View {
         float circleX = centerX;
         float circleY = centerY;
 
+        mLockPaint.setStrokeWidth(strokeWidth);
+
         canvas.drawCircle(circleX, circleY, circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
-        canvas.drawRoundRect(lockLeftX, lockTopY, lockRightX, lockBottomY, 10, 10, mLockPaint);
+        canvas.drawRoundRect(lockLeftX, lockTopY, lockRightX, lockBottomY, strokeWidth, strokeWidth, mLockPaint);
         canvas.drawCircle(keyHoleX, keyHoleY, keyHoleRadius, mLockPaint);
         canvas.drawLine(handleSideLeftX, handleSideBottomY, handleSideLeftX, handleSideTopY, mLockPaint);
         canvas.drawLine(handleSideRightX, handleSideBottomY, handleSideRightX, handleSideTopY, mLockPaint);
