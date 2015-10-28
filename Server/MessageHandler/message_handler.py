@@ -1,14 +1,23 @@
 import logging
+import os
+
+from gcm import GCM
+
+GCM_ENV = 'GCM_KEY'
+GCM_KEY = os.getenv(GCM_ENV)
+if not GCM_KEY:
+    raise Exception('{} environment key not found.'.format(GCM_ENV))
+gcm = GCM(GCM_KEY)
 
 
 def get_params(data):
-        param_list = data.split("\n")
-        param_list.remove("")
-        params = {}
-        for param in param_list:
-            key_value = param.split("=")
-            params[key_value[0]] = key_value[1]
-        return params
+    param_list = data.split("\n")
+    param_list.remove("")
+    params = {}
+    for param in param_list:
+        key_value = param.split("=")
+        params[key_value[0]] = key_value[1]
+    return params
 
 
 class MessageHandler:
@@ -27,6 +36,7 @@ class MessageHandler:
     def handle_msg(self, msg, ):
         params = get_params(msg)
         if 'register' in params:
+            logging.info(gcm.plaintext_request(params['register'], data={"message": "hi!"}))
             return 'Register device'  # TODO devices.add(params["register"])
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
