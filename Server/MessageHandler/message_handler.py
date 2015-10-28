@@ -1,13 +1,4 @@
 import logging
-import os
-
-from gcm import GCM
-
-GCM_ENV = 'GCM_KEY'
-GCM_KEY = os.getenv(GCM_ENV)
-if not GCM_KEY:
-    raise Exception('{} environment key not found.'.format(GCM_ENV))
-gcm = GCM(GCM_KEY)
 
 
 def get_params(data):
