@@ -27,9 +27,9 @@ class MessageHandler:
     def handle_msg(self, msg, ):
         params = get_params(msg)
         if 'register' in params:
-            return 'Register device'  # devices.add(params["register"])
+            return 'Register device'  # TODO devices.add(params["register"])
         elif 'doorbell' in params:
-            return 'Notify doorbell'  # self.notify_doorbell()
+            return 'Notify doorbell'  # TODO self.notify_doorbell()
 
     def notify_doorbell(self):
         pass
