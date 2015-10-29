@@ -2,32 +2,35 @@ import logging
 
 
 def get_params(data):
-    param_list = data.split("\n")
+    param_list = data.split('\n')
     params = {}
     for param in param_list:
-        key_value = param.split("=")
+        key_value = param.split('=')
         params[key_value[0]] = key_value[1]
     return params
 
 
 class MessageHandler:
+    log = None
     server = None
 
     def __init__(self, server, ):
+        self.log = logging.getLogger('MessageHandler')
+        self.log.setLevel(logging.DEBUG)
         self.server = server
 
     def __call__(self, msg, ):
-        logging.debug('Handler - Handle msg')
         response = self.handle_msg(msg)
         if response:
-            logging.debug('Handler - Response: {}'.format(response))
+            self.log.debug('Response: {}'.format(response))
         return response
 
     def handle_msg(self, msg, ):
         params = get_params(msg)
         if 'register' in params:
-            logging.info(self.server.server.gcm.plaintext_request(params['register'], data={"message": "hi!"}))
-            return 'Register device'  # TODO devices.add(params["register"])
+            response = self.server.server.gcm.plaintext_request(params['register'], data={"message": "hi!"})
+            self.log.debug('GCM response: {}'.format(response))
+            return 'Register device'  # TODO devices.add(params['register'])
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
 
