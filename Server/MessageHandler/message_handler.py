@@ -3,7 +3,6 @@ import logging
 
 def get_params(data):
     param_list = data.split("\n")
-    param_list.remove("")
     params = {}
     for param in param_list:
         key_value = param.split("=")
@@ -27,10 +26,10 @@ class MessageHandler:
     def handle_msg(self, msg, ):
         params = get_params(msg)
         if 'register' in params:
-            logging.info(gcm.plaintext_request(params['register'], data={"message": "hi!"}))
+            logging.info(self.server.server.gcm.plaintext_request(params['register'], data={"message": "hi!"}))
             return 'Register device'  # TODO devices.add(params["register"])
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
 
-    def notify_doorbell(self):
+    def notify_doorbell(self, ):
         pass
