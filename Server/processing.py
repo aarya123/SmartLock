@@ -1,5 +1,6 @@
 import logging
 import os
+import socket
 
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from gcm import GCM
@@ -12,16 +13,11 @@ DEFAULT_PROCESS_TIMEOUT = 1000
 PORT = 8000
 
 GCM_ENV = 'GCM_KEY'
-GCM_KEY = os.getenv(GCM_ENV)
-if not GCM_KEY:
-    raise Exception('{} environment key not found.'.format(GCM_ENV))
-GCM = GCM(GCM_KEY)
 
 
 def launch_tcp_server():
-    set_logging()
     handler = RequestHandler
-    httpd = HTTPServer(("", PORT), handler, bind_and_activate=False)
+    httpd = Server(("", PORT), handler, bind_and_activate=False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
@@ -32,10 +28,26 @@ def launch_tcp_server():
     httpd.server_close()
 
 
-def set_logging():
-    log = logging.getLogger()
-    log.setLevel(logging.DEBUG)
-    logging.debug('Configured Logger')
+class Server(HTTPServer):
+    gcm = None
+
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        self.setup_logging()
+        self.gcm = self.setup_gcm()
+        HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+
+    def setup_gcm(self):
+        gcm_key = os.getenv(GCM_ENV)
+        if not gcm_key:
+            raise Exception('{} environment key not found.'.format(GCM_ENV))
+        logging.debug('Configured GCM Service')
+        gcm = GCM(gcm_key)
+        return gcm
+
+    def setup_logging(self):
+        log = logging.getLogger()
+        log.setLevel(logging.DEBUG)
+        logging.debug('Configured Logger')
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -52,11 +64,37 @@ class RequestHandler(BaseHTTPRequestHandler):
         logging.debug('POST recieved')
         self.process_request()
 
-    def process_request(self):
+    def process_request(self, ):
         if 'Content-Length' in self.headers:
-            data = self.rfile.read(int(self.headers['Content-Length']))
-            self.rfile.close()
+            content_length = 0
+            data = ''
+
+            try:
+                content_length = int(self.headers['Content-Length'])
+            except TypeError, e:
+                logging.error('Content length value does not match type Integer. {}'.format(e))
+            if content_length <= 0:
+                logging.error('Invalid content length: {}'.format(content_length))
+                return
+
+            try:
+                data = self.rfile.read(content_length).strip()
+            except TypeError, e:
+                logging.error('Content does not match type String. {}'.format(e))
+            if len(data) <= 0:
+                logging.error('Data could not be parsed from message.')
+                return
+
             logging.debug('msg: {}'.format(data))
             response = MessageHandler(self).__call__(data)
             if response:
                 MessageSender(self).__call__(response)
+
+    def __del__(self, ):
+        logging.debug('Reader - Closing read socket')
+        try:
+            if not self.rfile.closed:
+                self.rfile.flush()
+                self.rfile.close()
+        except socket.error, e:
+            logging.error('Sender - Failed to close socket: {}'.format(e))
