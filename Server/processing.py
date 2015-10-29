@@ -85,7 +85,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 logging.error('Data could not be parsed from message.')
                 return
 
-            logging.debug('msg: {}'.format(data))
+            logging.info('msg_received: {}'.format(data))
             response = MessageHandler(self).__call__(data)
             if response:
                 MessageSender(self).__call__(response)

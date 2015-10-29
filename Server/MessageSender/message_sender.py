@@ -9,7 +9,7 @@ class MessageSender:
         self.server = server
 
     def __call__(self, msg, ):
-        logging.debug('Sender - Send msg: {}'.format(msg))
+        logging.info('msg_response: {}'.format(msg))
         try:
             self.server.wfile.write(msg)
             logging.debug('Sender - Sent msg')
