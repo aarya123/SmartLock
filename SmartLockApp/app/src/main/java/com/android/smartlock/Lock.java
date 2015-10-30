@@ -3,7 +3,6 @@ package com.android.smartlock;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -14,7 +13,9 @@ public class Lock extends View {
 
     private static final int DEFAULT_LOCKED_COLOR = 0xfff50057;
     private static final int DEFAULT_UNLOCKED_COLOR = 0xff76ff03;
+    private static final int FPS = 1000 / 60;
     private static final boolean DEFAULT_LOCK_STATUS = false;
+
 
     private int mLockedBackgroundColor = DEFAULT_LOCKED_COLOR;
     private int mUnlockedBackgroundColor = DEFAULT_UNLOCKED_COLOR;
@@ -23,9 +24,14 @@ public class Lock extends View {
     private Paint mLockPaint;
     private Paint mLockedBackgroundPaint;
     private Paint mUnlockedBackgroundPaint;
+    private Paint mShadowPaint;
 
     private GestureDetector mGestureDetector;
-    private int mSize;
+
+    private boolean down = false;
+    private int downCount = 0;
+
+    private LockDimensions mLockDimensions = new LockDimensions();
 
     public Lock(Context context) {
         this(context, null);
@@ -78,6 +84,24 @@ public class Lock extends View {
         }
     }
 
+    private boolean isDown() {
+        if (down && downCount < 30) {
+            downCount++;
+            postInvalidateDelayed(FPS);
+            return false;
+        }
+        return down;
+    }
+
+    private void setDown(boolean newDown) {
+        this.down = newDown;
+        if (!newDown) {
+            mLockDimensions.tintSize = 0;
+            downCount = 0;
+        }
+        invalidate();
+    }
+
     public boolean isLocked() {
         return mLocked;
     }
@@ -99,22 +123,27 @@ public class Lock extends View {
         mLockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLockedBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mUnlockedBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         mLockPaint.setColor(0xff424242);
         mLockedBackgroundPaint.setColor(mLockedBackgroundColor);
         mUnlockedBackgroundPaint.setColor(mUnlockedBackgroundColor);
+        mShadowPaint.setColor(0x66000000);
 
         mLockPaint.setStyle(Paint.Style.STROKE);
         mLockedBackgroundPaint.setStyle(Paint.Style.FILL);
         mUnlockedBackgroundPaint.setStyle(Paint.Style.FILL);
+        mShadowPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(getContext(), new LockSimpleGestureListener());
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
-        setMeasuredDimension(mSize, mSize);
+        int size = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+        mLockDimensions.size = size;
+        mLockDimensions.update();
+        setMeasuredDimension(size, size);
     }
 
     @SuppressWarnings({"UnnecessaryLocalVariable"})
@@ -122,45 +151,25 @@ public class Lock extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        float centerX = mSize / 2.0f;
-        float centerY = mSize / 2.0f;
-        float strokeWidth = mSize * 0.02f;
+        canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
+        canvas.drawRoundRect(mLockDimensions.lockLeftX, mLockDimensions.lockTopY, mLockDimensions.lockRightX, mLockDimensions.lockBottomY, mLockDimensions.strokeWidth, mLockDimensions.strokeWidth, mLockPaint);
+        canvas.drawCircle(mLockDimensions.keyHoleX, mLockDimensions.keyHoleY, mLockDimensions.keyHoleRadius, mLockPaint);
+        canvas.drawLine(mLockDimensions.handleSideLeftX, mLockDimensions.handleSideBottomY, mLockDimensions.handleSideLeftX, mLockDimensions.handleSideTopY, mLockPaint);
+        canvas.drawLine(mLockDimensions.handleSideRightX, mLockDimensions.handleSideBottomY, mLockDimensions.handleSideRightX, mLockDimensions.handleSideTopY, mLockPaint);
+        canvas.drawArc(mLockDimensions.handleArcLeftX, mLockDimensions.handleArcTopY, mLockDimensions.handleArcRightX, mLockDimensions.handleArcBottomY, 180f, 180f, false, mLockPaint);
+        canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.tintSize, mShadowPaint);
 
-        float lockHeight = mSize * 0.5f;
-        float lockWidth = lockHeight * 2.0f / 3.0f;
-        float lockLeftX = centerX - lockWidth / 2.0f;
-        float lockRightX = centerX + lockWidth / 2.0f;
-        float lockTopY = centerY - mSize * 0.075f;
-        float lockBottomY = lockTopY + lockHeight / 2.0f;
-
-        float keyHoleX = centerX;
-        float keyHoleY = (lockTopY + lockBottomY) / 2.0f;
-        float keyHoleRadius = lockWidth * 0.1f;
-
-        float handleSideLength = mSize * 0.1f;
-        float handleSideBottomY = lockTopY;
-        float handleSideTopY = lockTopY - handleSideLength;
-        float handleSideLeftX = centerX - lockWidth * 0.25f;
-        float handleSideRightX = centerX + lockWidth * 0.25f;
-
-        float handleArcLength = mSize * .075f;
-        float handleArcLeftX = handleSideLeftX;
-        float handleArcRightX = handleSideRightX;
-        float handleArcBottomY = handleSideTopY + handleArcLength;
-        float handleArcTopY = handleSideTopY - handleArcLength;
-
-        float circleRadius = mSize / 2.0f;
-        float circleX = centerX;
-        float circleY = centerY;
-
-        mLockPaint.setStrokeWidth(strokeWidth);
-
-        canvas.drawCircle(circleX, circleY, circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
-        canvas.drawRoundRect(lockLeftX, lockTopY, lockRightX, lockBottomY, strokeWidth, strokeWidth, mLockPaint);
-        canvas.drawCircle(keyHoleX, keyHoleY, keyHoleRadius, mLockPaint);
-        canvas.drawLine(handleSideLeftX, handleSideBottomY, handleSideLeftX, handleSideTopY, mLockPaint);
-        canvas.drawLine(handleSideRightX, handleSideBottomY, handleSideRightX, handleSideTopY, mLockPaint);
-        canvas.drawArc(handleArcLeftX, handleArcTopY, handleArcRightX, handleArcBottomY, 180f, 180f, false, mLockPaint);
+        if (isDown()) {
+            if (mLockDimensions.tintSize < mLockDimensions.circleRadius) {
+                mLockDimensions.tintSize += 3000 / (mLockDimensions.circleRadius - mLockDimensions.tintSize);
+            }
+            if (mLockDimensions.tintSize != mLockDimensions.circleRadius) {
+                if (mLockDimensions.tintSize > mLockDimensions.circleRadius) {
+                    mLockDimensions.tintSize = mLockDimensions.circleRadius;
+                }
+                postInvalidateDelayed(FPS);
+            }
+        }
     }
 
     @Override
@@ -168,7 +177,7 @@ public class Lock extends View {
         boolean result = mGestureDetector.onTouchEvent(event);
         if (!result) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                //TODO:Make bg lighter
+                setDown(false);
                 result = true;
             }
         }
@@ -178,12 +187,7 @@ public class Lock extends View {
     class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
-            int color = Lock.this.isLocked() ? mLockedBackgroundColor : mUnlockedBackgroundColor;
-            double red = Color.red(color) * .75;
-            double green = Color.green(color) * .75;
-            double blue = Color.blue(color) * .75;
-
-            //TODO:Make bg darker
+            setDown(true);
             return true;
         }
 
@@ -191,6 +195,79 @@ public class Lock extends View {
         public boolean onSingleTapConfirmed(MotionEvent e) {
             Lock.this.toggleLocked();
             return true;
+        }
+    }
+
+    private class LockDimensions {
+
+        int size;
+
+        float centerX;
+        float centerY;
+        float strokeWidth;
+
+        float lockHeight;
+        float lockWidth;
+        float lockLeftX;
+        float lockRightX;
+        float lockTopY;
+        float lockBottomY;
+
+        float keyHoleX;
+        float keyHoleY;
+        float keyHoleRadius;
+
+        float handleSideLength;
+        float handleSideBottomY;
+        float handleSideTopY;
+        float handleSideLeftX;
+        float handleSideRightX;
+
+        float handleArcLength;
+        float handleArcLeftX;
+        float handleArcRightX;
+        float handleArcBottomY;
+        float handleArcTopY;
+
+        float circleRadius;
+        float circleX;
+        float circleY;
+
+        float tintSize;
+
+        public void update() {
+            centerX = size / 2.0f;
+            centerY = size / 2.0f;
+            strokeWidth = size * 0.02f;
+
+            lockHeight = size * 0.5f;
+            lockWidth = lockHeight * 2.0f / 3.0f;
+            lockLeftX = centerX - lockWidth / 2.0f;
+            lockRightX = centerX + lockWidth / 2.0f;
+            lockTopY = centerY - size * 0.075f;
+            lockBottomY = lockTopY + lockHeight / 2.0f;
+
+            keyHoleX = centerX;
+            keyHoleY = (lockTopY + lockBottomY) / 2.0f;
+            keyHoleRadius = lockWidth * 0.1f;
+
+            handleSideLength = size * 0.1f;
+            handleSideBottomY = lockTopY;
+            handleSideTopY = lockTopY - handleSideLength;
+            handleSideLeftX = centerX - lockWidth * 0.25f;
+            handleSideRightX = centerX + lockWidth * 0.25f;
+
+            handleArcLength = size * .075f;
+            handleArcLeftX = handleSideLeftX;
+            handleArcRightX = handleSideRightX;
+            handleArcBottomY = handleSideTopY + handleArcLength;
+            handleArcTopY = handleSideTopY - handleArcLength;
+
+            circleRadius = size / 2.0f;
+            circleX = centerX;
+            circleY = centerY;
+
+            mLockPaint.setStrokeWidth(mLockDimensions.strokeWidth);
         }
     }
 }
