@@ -161,7 +161,7 @@ public class Lock extends View {
 
         if (isDown()) {
             if (mLockDimensions.tintSize < mLockDimensions.circleRadius) {
-                mLockDimensions.tintSize += 3000 / (mLockDimensions.circleRadius - mLockDimensions.tintSize);
+                mLockDimensions.tintSize += 5000 / (mLockDimensions.circleRadius - mLockDimensions.tintSize);
             }
             if (mLockDimensions.tintSize != mLockDimensions.circleRadius) {
                 if (mLockDimensions.tintSize > mLockDimensions.circleRadius) {
