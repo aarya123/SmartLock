@@ -33,6 +33,8 @@ public class Lock extends View {
 
     private LockDimensions mLockDimensions = new LockDimensions();
 
+    private ShadowInterpolator mShadowInterpolator;
+
     public Lock(Context context) {
         this(context, null);
     }
@@ -98,6 +100,7 @@ public class Lock extends View {
         if (!newDown) {
             mLockDimensions.tintSize = 0;
             downCount = 0;
+            mShadowInterpolator = null;
         }
         invalidate();
     }
@@ -160,13 +163,11 @@ public class Lock extends View {
         canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.tintSize, mShadowPaint);
 
         if (isDown()) {
-            if (mLockDimensions.tintSize < mLockDimensions.circleRadius) {
-                mLockDimensions.tintSize += 5000 / (mLockDimensions.circleRadius - mLockDimensions.tintSize);
+            if (mShadowInterpolator == null) {
+                mShadowInterpolator = new ShadowInterpolator();
             }
-            if (mLockDimensions.tintSize != mLockDimensions.circleRadius) {
-                if (mLockDimensions.tintSize > mLockDimensions.circleRadius) {
-                    mLockDimensions.tintSize = mLockDimensions.circleRadius;
-                }
+            mLockDimensions.tintSize = mShadowInterpolator.getInterpolation() * mLockDimensions.circleRadius;
+            if (mLockDimensions.tintSize < mLockDimensions.circleRadius) {
                 postInvalidateDelayed(FPS);
             }
         }
@@ -184,7 +185,7 @@ public class Lock extends View {
         return result;
     }
 
-    class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {
+    private class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
             setDown(true);
@@ -268,6 +269,27 @@ public class Lock extends View {
             circleY = centerY;
 
             mLockPaint.setStrokeWidth(mLockDimensions.strokeWidth);
+        }
+    }
+
+    private class ShadowInterpolator {
+        private long start;
+
+        public ShadowInterpolator() {
+            start = System.currentTimeMillis();
+        }
+
+        public float getInterpolation() {
+            return (float) (Math.cos((getTime() + 1) * Math.PI) / 2.0f) + 0.5f;
+
+        }
+
+        private float getTime() {
+            float time = (System.currentTimeMillis() - start) / 1000.0f;
+            if (time > 1) {
+                time = 1;
+            }
+            return time;
         }
     }
 }
