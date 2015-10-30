@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -26,6 +25,7 @@ public class Lock extends View {
     private Paint mUnlockedBackgroundPaint;
 
     private GestureDetector mGestureDetector;
+    private int mSize;
 
     public Lock(Context context) {
         this(context, null);
@@ -62,7 +62,6 @@ public class Lock extends View {
         mLockedBackgroundPaint.setColor(mLockedBackgroundColor);
         if (viewNeedsUpdating) {
             invalidate();
-            requestLayout();
         }
     }
 
@@ -76,7 +75,6 @@ public class Lock extends View {
         mUnlockedBackgroundPaint.setColor(mUnlockedBackgroundColor);
         if (viewNeedsUpdating) {
             invalidate();
-            requestLayout();
         }
     }
 
@@ -89,14 +87,12 @@ public class Lock extends View {
         this.mLocked = mLocked;
         if (viewNeedsUpdating) {
             invalidate();
-            requestLayout();
         }
     }
 
     public void toggleLocked() {
         this.mLocked = !this.mLocked;
         invalidate();
-        requestLayout();
     }
 
     private void init() {
@@ -117,8 +113,8 @@ public class Lock extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int size = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
-        setMeasuredDimension(size, size);
+        mSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+        setMeasuredDimension(mSize, mSize);
     }
 
     @SuppressWarnings({"UnnecessaryLocalVariable"})
@@ -126,36 +122,34 @@ public class Lock extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Rect dimensions = canvas.getClipBounds();
-        int size = Math.min(dimensions.width(), dimensions.height());
-        float centerX = size / 2.0f;
-        float centerY = size / 2.0f;
-        float strokeWidth = size * 0.02f;
+        float centerX = mSize / 2.0f;
+        float centerY = mSize / 2.0f;
+        float strokeWidth = mSize * 0.02f;
 
-        float lockHeight = size * 0.5f;
+        float lockHeight = mSize * 0.5f;
         float lockWidth = lockHeight * 2.0f / 3.0f;
         float lockLeftX = centerX - lockWidth / 2.0f;
         float lockRightX = centerX + lockWidth / 2.0f;
-        float lockTopY = centerY - size * 0.075f;
+        float lockTopY = centerY - mSize * 0.075f;
         float lockBottomY = lockTopY + lockHeight / 2.0f;
 
         float keyHoleX = centerX;
         float keyHoleY = (lockTopY + lockBottomY) / 2.0f;
         float keyHoleRadius = lockWidth * 0.1f;
 
-        float handleSideLength = size * 0.1f;
+        float handleSideLength = mSize * 0.1f;
         float handleSideBottomY = lockTopY;
         float handleSideTopY = lockTopY - handleSideLength;
         float handleSideLeftX = centerX - lockWidth * 0.25f;
         float handleSideRightX = centerX + lockWidth * 0.25f;
 
-        float handleArcLength = size * .075f;
+        float handleArcLength = mSize * .075f;
         float handleArcLeftX = handleSideLeftX;
         float handleArcRightX = handleSideRightX;
         float handleArcBottomY = handleSideTopY + handleArcLength;
         float handleArcTopY = handleSideTopY - handleArcLength;
 
-        float circleRadius = size / 2.0f;
+        float circleRadius = mSize / 2.0f;
         float circleX = centerX;
         float circleY = centerY;
 
