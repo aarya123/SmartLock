@@ -20,8 +20,9 @@ class DatabaseConnector:
         get_tables = self.execute('SELECT name FROM sqlite_master WHERE type="table";')
         self.log.debug('Active Tables: {}'.format(get_tables))
 
-        if get_tables.__contains__('DEVICES'):
+        if len(get_tables) < 1 or 'DEVICES' not in get_tables[0]:
             self.create_devices_table()
+            self.db_conn.commit()
             self.log.debug('Created DEVICES table')
 
     def create_devices_table(self):
