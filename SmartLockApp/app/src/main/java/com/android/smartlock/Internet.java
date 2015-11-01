@@ -1,6 +1,5 @@
 package com.android.smartlock;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -8,11 +7,20 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class Internet extends AsyncTask<String, String, String> {
+public class Internet {
 
     int RESPONSE_LEN = 2048;
+    private String result;
 
-    private String tcpSend(String content) {
+    protected Internet(String... params) {
+        String get = "";
+        for (int i = 0; i < params.length; i += 2) {
+            get += params[i] + "=" + params[i + 1] + "\n";
+        }
+        tcpSend(get);
+    }
+
+    private void tcpSend(String content) {
         final String header = "GET /smartlock-user-agent/ HTTP/1.1\n" +
                 "Host: smartlock\n" +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)\n" +
@@ -40,20 +48,10 @@ public class Internet extends AsyncTask<String, String, String> {
         } catch (Exception exc) {
             modifiedSentence = "";
         }
-        return modifiedSentence;
+        this.result = modifiedSentence;
     }
 
-    @Override
-    protected String doInBackground(String... params) {
-        String get = "";
-        for (int i = 0; i < params.length; i += 2) {
-            get += params[i] + "=" + params[i + 1] + "\n";
-        }
-        return tcpSend(get);
+    public String getResult() {
+        return result;
     }
-
-    protected void onPostExecute(String response) {
-        Log.d("TCP Recieved: ", response);
-    }
-
 }

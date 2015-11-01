@@ -31,9 +31,9 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Constants.IP = serverAddress.getText().toString();
                 if (lockButton.isLocked()) {
-                    new Internet().execute("lock_door", "true");
+                    new LockDoor(MainActivity.this).execute();
                 } else {
-                    new Internet().execute("unlock_door", "true");
+                    new LockDoor(MainActivity.this).execute();
                 }
             }
         });
