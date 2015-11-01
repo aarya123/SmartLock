@@ -71,6 +71,3 @@ class MessageHandler:
             return self.handler.server.rpi.lock_door()
         elif 'unlock_door' in params:
             return self.handler.server.rpi.unlock_door()
-
-    def notify_doorbell(self, ):
-        pass
