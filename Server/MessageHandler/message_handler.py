@@ -34,9 +34,9 @@ class MessageHandler:
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
         elif 'lock_door' in params:
-            return self.server.rpi.lock_door()
+            return self.server.server.rpi.lock_door()
         elif 'unlock_door' in params:
-            return self.server.rpi.unlock_door()
+            return self.server.server.rpi.unlock_door()
 
     def notify_doorbell(self, ):
         pass
