@@ -14,6 +14,7 @@ public class MainActivity extends Activity {
     Button pingButton;
     EditText serverAddress;
     TextView output;
+    Lock lockButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +25,21 @@ public class MainActivity extends Activity {
         serverAddress = (EditText) findViewById(R.id.editText_address);
         serverAddress.setText(Constants.IP);
         output = (TextView) findViewById(R.id.textView_output);
+        lockButton = (Lock) findViewById(R.id.lockButton);
 
-        pingButton.setOnClickListener( new View.OnClickListener() {
+        lockButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Constants.IP = serverAddress.getText().toString();
+                if (lockButton.isLocked()) {
+                    new Internet().execute("lock_door", "true");
+                } else {
+                    new Internet().execute("unlock_door", "true");
+                }
+            }
+        });
+
+        pingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Constants.IP = serverAddress.getText().toString();
