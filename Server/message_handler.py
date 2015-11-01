@@ -1,5 +1,6 @@
 import logging
 
+from device import Device, generate_id
 
 def get_params(data):
     param_list = data.split('\n')
@@ -28,9 +29,19 @@ class MessageHandler:
     def handle_msg(self, msg, ):
         params = get_params(msg)
         if 'register' in params:
-            response = self.server.server.gcm.plaintext_request(params['register'], data={"message": "hi!"})
-            self.log.debug('GCM response: {}'.format(response))
-            return 'Register device'  # TODO devices.add(params['register'])
+            # TODO fix GCM
+            # response = self.server.server.gcm.plaintext_request(params['register'], data={"message": "hi!"})
+            # self.log.debug('GCM response: {}'.format(response))
+            uid = generate_id()
+            output = self.server.server.db_mgr.execute('SELECT * FROM DEVICES')
+            return 'Register device'  # TODO
+        if 'uid' in params:
+            uid = params['uid']
+            output = self.server.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE ID={}'.format(uid))
+            if len(output) < 1:
+                self.log.error('UID [{}] not recognized'.format(uid))
+                return 'UID not recognized'
+            Device.__init__()
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
 
