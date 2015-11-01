@@ -1,10 +1,12 @@
-package com.android.smartlock;
+package com.android.smartlock.Internet;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.android.smartlock.Constants;
+import com.android.smartlock.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 

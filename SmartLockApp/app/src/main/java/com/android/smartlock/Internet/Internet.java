@@ -1,6 +1,7 @@
-package com.android.smartlock;
+package com.android.smartlock.Internet;
 
 import android.util.Log;
+import com.android.smartlock.Constants;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

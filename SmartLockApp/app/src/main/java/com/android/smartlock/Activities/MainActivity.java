@@ -1,4 +1,4 @@
-package com.android.smartlock;
+package com.android.smartlock.Activities;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,6 +7,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.smartlock.Constants;
+import com.android.smartlock.CustomViews.Lock;
+import com.android.smartlock.Internet.GCMRegister;
+import com.android.smartlock.Internet.LockDoor;
+import com.android.smartlock.Internet.UnlockDoor;
+import com.android.smartlock.R;
 
 public class MainActivity extends Activity {
 

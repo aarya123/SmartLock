@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+                android:name=".Activities.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,14 +39,14 @@
         </receiver>
 
         <service
-                android:name=".MyGcmListenerService"
+                android:name=".Services.MyGcmListenerService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
             </intent-filter>
         </service>
         <service
-                android:name=".MyInstanceIDListenerService"
+                android:name=".Services.MyInstanceIDListenerService"
                 android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID"/>

@@ -1,4 +1,4 @@
-package com.android.smartlock;
+package com.android.smartlock.CustomViews;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import com.android.smartlock.R;
 
 public class Lock extends View {
 

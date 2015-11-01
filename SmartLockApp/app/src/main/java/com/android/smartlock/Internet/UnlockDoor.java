@@ -1,9 +1,10 @@
-package com.android.smartlock;
+package com.android.smartlock.Internet;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import com.android.smartlock.Constants;
 
 public class UnlockDoor extends AsyncTask<String, String, String> {
     Context context;

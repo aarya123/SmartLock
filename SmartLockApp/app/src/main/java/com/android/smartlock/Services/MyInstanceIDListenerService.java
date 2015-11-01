@@ -1,5 +1,6 @@
-package com.android.smartlock;
+package com.android.smartlock.Services;
 
+import com.android.smartlock.Internet.GCMRegister;
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 public class MyInstanceIDListenerService extends InstanceIDListenerService {

@@ -1,4 +1,4 @@
-package com.android.smartlock;
+package com.android.smartlock.Services;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import com.android.smartlock.Activities.MainActivity;
+import com.android.smartlock.R;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class MyGcmListenerService extends GcmListenerService {
