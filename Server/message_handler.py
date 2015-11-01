@@ -41,7 +41,7 @@ class MessageHandler:
                     '''
                     INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
                     VALUES ({}, {}, {}, {});
-                    '''.format(uid, params['gcm_key'], datetime.now(), 0)
+                    '''.format(uid, params['register'], datetime.now(), 0)
                 )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
             return 'registered={}'.format(uid)
@@ -67,6 +67,10 @@ class MessageHandler:
         # End-User Functions
         if 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
+        elif 'lock_door' in params:
+            return self.server.server.rpi.lock_door()
+        elif 'unlock_door' in params:
+            return self.server.server.rpi.unlock_door()
 
     def notify_doorbell(self, ):
         pass

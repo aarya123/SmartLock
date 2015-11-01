@@ -35,6 +35,8 @@ public class Lock extends View {
 
     private ShadowInterpolator mShadowInterpolator;
 
+    private OnClickListener mOnClickListener;
+
     public Lock(Context context) {
         this(context, null);
     }
@@ -185,6 +187,14 @@ public class Lock extends View {
         return result;
     }
 
+    public OnClickListener getOnClickListener() {
+        return mOnClickListener;
+    }
+
+    public void setOnClickListener(OnClickListener mOnClickListener) {
+        this.mOnClickListener = mOnClickListener;
+    }
+
     private class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDown(MotionEvent e) {
@@ -195,6 +205,9 @@ public class Lock extends View {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             Lock.this.toggleLocked();
+            if (mOnClickListener != null) {
+                mOnClickListener.onClick(Lock.this);
+            }
             return true;
         }
     }

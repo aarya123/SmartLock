@@ -6,6 +6,7 @@ import sys
 
 from gcm import GCM
 
+from RPiHandler import RPiHandler
 from database import DatabaseConnector
 from message_handler import MessageHandler
 from message_sender import MessageSender
@@ -35,6 +36,7 @@ class Server(HTTPServer):
     db_mgr = None
     gcm = None
     log = None
+    rpi = None
 
     def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, bind_and_activate=True):
         self.setup_logging()
@@ -45,6 +47,7 @@ class Server(HTTPServer):
         else:
             self.log.debug('Got gcm key from environment')
             self.setup_gcm()
+        self.setup_rpi()
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
 
     def setup_database(self, DatabaseManagerClass, db_name):
@@ -67,6 +70,9 @@ class Server(HTTPServer):
 
     def __del__(self):
         self.log.warning('Server completed execution')
+
+    def setup_rpi(self):
+        self.rpi = RPiHandler()
 
 
 class RequestHandler(BaseHTTPRequestHandler):
