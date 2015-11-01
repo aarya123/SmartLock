@@ -13,11 +13,13 @@ def get_params(data):
 class MessageHandler:
     log = None
     server = None
+    rpi = None
 
-    def __init__(self, server, ):
+    def __init__(self, server, rpi):
         self.log = logging.getLogger('MessageHandler')
         self.log.setLevel(logging.DEBUG)
         self.server = server
+        self.rpi = rpi
 
     def __call__(self, msg, ):
         response = self.handle_msg(msg)
@@ -33,6 +35,10 @@ class MessageHandler:
             return 'Register device'  # TODO devices.add(params['register'])
         elif 'doorbell' in params:
             return 'Notify doorbell'  # TODO self.notify_doorbell()
+        elif 'lock_door' in params:
+            return self.rpi.lock_door()
+        elif 'unlock_door' in params:
+            return self.rpi.unlock_door()
 
     def notify_doorbell(self, ):
         pass
