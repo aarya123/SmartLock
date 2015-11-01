@@ -2,7 +2,6 @@ package com.android.smartlock;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,13 +51,5 @@ public class MainActivity extends Activity {
                 reg.execute();
             }
         });
-    }
-
-    public void onMessageReceived(String from, Bundle data) {
-        String TAG = "onMessageReceived";
-        String message = data.getString("message");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
-        output.setText(output.getText() + "\n" + message);
     }
 }
