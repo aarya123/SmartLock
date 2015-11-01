@@ -36,11 +36,11 @@ class MessageHandler:
             # TODO fix GCM
             # response = self.handler.server.gcm.plaintext_request(params['register'], data={"message": "hi!"})
             # self.log.debug('GCM response: {}'.format(response))
-            uid = generate_id()
+            uid = generate_id(6)
             output = self.handler.server.db_mgr.execute(
                     '''
                     INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
-                    VALUES ({}, {}, {}, {});
+                    VALUES ({}, "{}", "{}", {});
                     '''.format(uid, params['register'], datetime.now(), 0)
                 )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
