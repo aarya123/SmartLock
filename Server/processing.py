@@ -116,6 +116,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 MessageSender(self).__call__(response)
 
     def __del__(self, ):
+        self.server.log.debug('Commiting database changes')
+        self.server.db_mgr.db_conn.commit()
         self.server.log.debug('Closing read socket')
         try:
             if not self.rfile.closed:
