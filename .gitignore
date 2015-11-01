@@ -89,3 +89,5 @@ target/
 .DS_Store
 
 .idea/
+
+*.db
