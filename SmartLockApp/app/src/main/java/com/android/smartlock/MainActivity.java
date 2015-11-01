@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
                 if (lockButton.isLocked()) {
                     new LockDoor(MainActivity.this).execute();
                 } else {
-                    new LockDoor(MainActivity.this).execute();
+                    new UnlockDoor(MainActivity.this).execute();
                 }
             }
         });
