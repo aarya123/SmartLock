@@ -33,7 +33,7 @@ class RPiHandler:
         GPIO.output(self.negative_pin, 1)
         self.pwm.start(100)
         time.sleep(.5)
-        GPIO.output((self.postive_pin, 0)
+        GPIO.output(self.postive_pin, 0)
         GPIO.output(self.negative_pin, 0)
         self.pwm.stop()
         return "Done!"
@@ -43,7 +43,7 @@ class RPiHandler:
         GPIO.output(self.negative_pin, 0)
         self.pwm.start(100)
         time.sleep(.5)
-        GPIO.output((self.postive_pin, 0)
+        GPIO.output(self.postive_pin, 0)
         GPIO.output(self.negative_pin, 0)
         self.pwm.stop()
         return "Done!"
