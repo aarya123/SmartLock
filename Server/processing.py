@@ -1,14 +1,14 @@
 import logging
 import os
 import socket
-
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import sys
+
 from gcm import GCM
 
 from database import DatabaseConnector
 from MessageHandler.message_handler import MessageHandler
 from MessageSender.message_sender import MessageSender
-
 
 DB_NAME = 'smartlock.db'
 DEFAULT_PROCESS_TIMEOUT = 1000
@@ -38,7 +38,12 @@ class Server(HTTPServer):
     def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, bind_and_activate=True):
         self.setup_logging()
         self.setup_database(DatabaseManagerClass, DB_NAME)
-        self.setup_gcm()
+        if len(sys.argv) == 2:
+            self.log.debug('Got gcm key from cli')
+            self.setup_gcm_with_key(sys.argv[1])
+        else:
+            self.log.debug('Got gcm key from environment')
+            self.setup_gcm()
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
 
     def setup_database(self, DatabaseManagerClass, db_name):
@@ -48,8 +53,11 @@ class Server(HTTPServer):
         gcm_key = os.getenv(GCM_ENV)
         if not gcm_key:
             raise Exception('{} environment key not found.'.format(GCM_ENV))
-        self.log.debug('Configured gcm service')
+        self.gcm = self.setup_gcm(gcm_key)
+
+    def setup_gcm_with_key(self, gcm_key):
         self.gcm = GCM(gcm_key)
+        self.log.debug('Configured gcm service')
 
     def setup_logging(self):
         self.log = logging.getLogger('Server')
