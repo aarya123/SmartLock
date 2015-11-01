@@ -56,7 +56,7 @@ class Server(HTTPServer):
         gcm_key = os.getenv(GCM_ENV)
         if not gcm_key:
             raise Exception('{} environment key not found.'.format(GCM_ENV))
-        self.gcm = self.setup_gcm(gcm_key)
+        self.setup_gcm_with_key(gcm_key)
 
     def setup_gcm_with_key(self, gcm_key):
         self.gcm = GCM(gcm_key)
