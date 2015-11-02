@@ -2,7 +2,6 @@ package com.android.smartlock.Internet;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import com.android.smartlock.Constants;
 
@@ -14,8 +13,7 @@ public class LockDoor extends AsyncTask<String, String, String> {
     }
 
     protected String doInBackground(String... strings) {
-        String uid = PreferenceManager.getDefaultSharedPreferences(context).getString(Constants.DEVICE_ID_KEY, "-1");
-        String result = new Internet("lock_door", "true", "uid", uid).getResult();
+        String result = new Internet("lock_door", "true", "uid", Constants.getDeviceId()).getResult();
         Log.d("LockDoor", result);
         return result;
     }

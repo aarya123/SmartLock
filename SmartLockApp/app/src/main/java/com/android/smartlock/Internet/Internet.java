@@ -30,13 +30,13 @@ public class Internet {
                 "Accept-Language: en-us,en;q=0.5\n\n";
         String msg = header + content + '\n';
 
-        Log.d("TCP", Constants.IP + " " + Constants.PORT + " " + Constants.TIMEOUT + " " + content);
+        Log.d("TCP", Constants.getIPAdress() + " " + Constants.PORT + " " + Constants.TIMEOUT + " " + content);
 
         char[] buff = new char[RESPONSE_LEN];
         String modifiedSentence;
         Socket clientSocket;
         try {
-            clientSocket = new Socket(Constants.IP, Constants.PORT);
+            clientSocket = new Socket(Constants.getIPAdress(), Constants.PORT);
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer.writeBytes(msg);
@@ -47,7 +47,7 @@ public class Internet {
             outToServer.close();
             inFromServer.close();
         } catch (Exception exc) {
-            modifiedSentence = "";
+            modifiedSentence = "-1";
         }
         this.result = modifiedSentence;
     }
