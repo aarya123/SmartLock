@@ -5,21 +5,25 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class Constants {
-    public static final int TIMEOUT = 5000;
 
     private static final String DEVICE_ID_KEY = "deviceId";
     private static final String IP_ADDRESS_KEY = "ipAddress";
     private static final String PORT_KEY = "port";
+    private static final String TIMEOUT_KEY = "key";
     private static SharedPreferences mSharedPreferences;
     private static String IP_ADDRESS;
     private static String DEVICE_ID;
     private static int PORT;
+    private static int TIMEOUT;
 
     public static void init(Context context) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        DEVICE_ID = mSharedPreferences.getString(DEVICE_ID_KEY, "-1");
-        IP_ADDRESS = mSharedPreferences.getString(IP_ADDRESS_KEY, "192.168.1.1");
-        PORT = mSharedPreferences.getInt(PORT_KEY, 8000);
+        if (mSharedPreferences == null) {
+            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            DEVICE_ID = mSharedPreferences.getString(DEVICE_ID_KEY, "-1");
+            IP_ADDRESS = mSharedPreferences.getString(IP_ADDRESS_KEY, "192.168.1.1");
+            PORT = mSharedPreferences.getInt(PORT_KEY, 8000);
+            TIMEOUT = mSharedPreferences.getInt(TIMEOUT_KEY, 5000);
+        }
     }
 
     public static String getDeviceId() {
@@ -47,5 +51,14 @@ public class Constants {
     public static void setPort(int port) {
         Constants.PORT = port;
         mSharedPreferences.edit().putInt(PORT_KEY, port).apply();
+    }
+
+    public static int getTimeout() {
+        return TIMEOUT;
+    }
+
+    public static void setTimeout(int timeout) {
+        Constants.TIMEOUT = timeout;
+        mSharedPreferences.edit().putInt(TIMEOUT_KEY, timeout).apply();
     }
 }

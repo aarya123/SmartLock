@@ -17,11 +17,21 @@
     <android.support.design.widget.TextInputLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
-    <EditText
-            android:hint="Port"
+        <EditText
+                android:hint="Port"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:id="@+id/portEditText"/>
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned"
-            android:id="@+id/portEditText"/>
+            android:layout_height="wrap_content">
+        <EditText
+                android:hint="Timeout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberSigned"
+                android:id="@+id/timeoutEditText"/>
     </android.support.design.widget.TextInputLayout>
 </LinearLayout>

@@ -30,7 +30,7 @@ public class Internet {
                 "Accept-Language: en-us,en;q=0.5\n\n";
         String msg = header + content + '\n';
 
-        Log.d("TCP", Constants.getIPAdress() + " " + Constants.getPort() + " " + Constants.TIMEOUT + " " + content);
+        Log.d("TCP", Constants.getIPAdress() + " " + Constants.getPort() + " " + Constants.getTimeout() + " " + content);
 
         char[] buff = new char[RESPONSE_LEN];
         String modifiedSentence;
@@ -40,7 +40,7 @@ public class Internet {
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer.writeBytes(msg);
-            clientSocket.setSoTimeout(Constants.TIMEOUT);
+            clientSocket.setSoTimeout(Constants.getTimeout());
             inFromServer.read(buff, 0, RESPONSE_LEN);
             modifiedSentence = String.valueOf(buff).trim();
             clientSocket.close();

@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         Constants.init(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         pingButton = (Button) findViewById(R.id.button_ping);
         output = (TextView) findViewById(R.id.textView_output);
         lockButton = (Lock) findViewById(R.id.lockButton);

@@ -9,8 +9,7 @@ import com.android.smartlock.Constants;
 import com.android.smartlock.R;
 
 public class SettingsActivity extends AppCompatActivity {
-    EditText ipEditText;
-    EditText portEditText;
+    EditText ipEditText, portEditText, timeoutEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +19,11 @@ public class SettingsActivity extends AppCompatActivity {
         ipEditText.setText(Constants.getIPAdress());
         portEditText = (EditText) findViewById(R.id.portEditText);
         portEditText.setText(Constants.getPort() + "");
+        timeoutEditText = (EditText) findViewById(R.id.timeoutEditText);
+        timeoutEditText.setText(Constants.getTimeout() + "");
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         return true;
@@ -33,6 +35,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (id == R.id.saveButton) {
             Constants.setIpAddress(ipEditText.getText().toString());
             Constants.setPort(Integer.parseInt(portEditText.getText().toString()));
+            Constants.setTimeout(Integer.parseInt(timeoutEditText.getText().toString()));
             finish();
             return true;
         } else if (id == R.id.discardButton) {
