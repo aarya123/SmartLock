@@ -5,17 +5,23 @@
               android:orientation="vertical"
               android:padding="@dimen/activity_horizontal_margin"
               tools:context="com.android.smartlock.Activities.SettingsActivity">
-
-    <EditText
-            android:hint="IP Address"
+    <android.support.design.widget.TextInputLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/ipEditText"/>
+            android:layout_height="wrap_content">
+        <EditText
+                android:hint="IP Address"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ipEditText"/>
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
     <EditText
             android:hint="Port"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:inputType="numberSigned"
             android:id="@+id/portEditText"/>
-
+    </android.support.design.widget.TextInputLayout>
 </LinearLayout>

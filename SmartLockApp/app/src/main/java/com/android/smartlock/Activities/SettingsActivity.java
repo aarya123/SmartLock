@@ -1,14 +1,14 @@
 package com.android.smartlock.Activities;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import com.android.smartlock.Constants;
 import com.android.smartlock.R;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends AppCompatActivity {
     EditText ipEditText;
     EditText portEditText;
 
