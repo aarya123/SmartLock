@@ -1,0 +1,21 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="@dimen/activity_horizontal_margin"
+              tools:context="com.android.smartlock.Activities.SettingsActivity">
+
+    <EditText
+            android:hint="IP Address"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ipEditText"/>
+    <EditText
+            android:hint="Port"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned"
+            android:id="@+id/portEditText"/>
+
+</LinearLayout>
