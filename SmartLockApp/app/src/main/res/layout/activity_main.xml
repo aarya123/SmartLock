@@ -16,18 +16,6 @@
             android:paddingRight="5dp"
             android:paddingBottom="5dp"/>
 
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:id="@+id/textView_output"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="5dp"
-            android:paddingTop="5dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="5dp"
-            android:padding="5dp"/>
-
     <com.android.smartlock.CustomViews.Lock
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

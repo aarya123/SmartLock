@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.CustomViews.Lock;
@@ -19,7 +18,6 @@ import com.android.smartlock.R;
 public class MainActivity extends AppCompatActivity {
 
     Button pingButton;
-    TextView output;
     Lock lockButton;
 
     @Override
@@ -28,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         pingButton = (Button) findViewById(R.id.button_ping);
-        output = (TextView) findViewById(R.id.textView_output);
         lockButton = (Lock) findViewById(R.id.lockButton);
 
         lockButton.setOnClickListener(new View.OnClickListener() {
