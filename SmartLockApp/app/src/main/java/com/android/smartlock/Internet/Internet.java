@@ -13,15 +13,15 @@ public class Internet {
     int RESPONSE_LEN = 2048;
     private String result;
 
-    protected Internet(String... params) {
+    protected Internet(String ip, String... params) {
         String get = "";
         for (int i = 0; i < params.length; i += 2) {
             get += params[i] + "=" + params[i + 1] + "\n";
         }
-        tcpSend(get);
+        tcpSend(ip, get);
     }
 
-    private void tcpSend(String content) {
+    private void tcpSend(String ip, String content) {
         final String header = "GET /smartlock-user-agent/ HTTP/1.1\n" +
                 "Host: smartlock\n" +
                 "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)\n" +
@@ -30,13 +30,13 @@ public class Internet {
                 "Accept-Language: en-us,en;q=0.5\n\n";
         String msg = header + content + '\n';
 
-        Log.d("TCP", Constants.getIPAdress() + " " + Constants.getPort() + " " + Constants.getTimeout() + " " + content);
+        Log.d("TCP", ip + " " + Constants.getPort() + " " + Constants.getTimeout() + " " + content);
 
         char[] buff = new char[RESPONSE_LEN];
         String modifiedSentence;
         Socket clientSocket;
         try {
-            clientSocket = new Socket(Constants.getIPAdress(), Constants.getPort());
+            clientSocket = new Socket(ip, Constants.getPort());
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer.writeBytes(msg);
