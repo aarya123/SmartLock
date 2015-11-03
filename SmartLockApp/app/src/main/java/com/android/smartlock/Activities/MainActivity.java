@@ -11,14 +11,13 @@ import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.CustomViews.Lock;
 import com.android.smartlock.Internet.GCMRegister;
-import com.android.smartlock.Internet.LocatePi;
 import com.android.smartlock.Internet.LockDoor;
 import com.android.smartlock.Internet.UnlockDoor;
 import com.android.smartlock.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button pingButton, searchButton;
+    Button pingButton;
     Lock lockButton;
 
     @Override
@@ -28,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         pingButton = (Button) findViewById(R.id.button_ping);
         lockButton = (Lock) findViewById(R.id.lockButton);
-        searchButton = (Button) findViewById(R.id.button_search);
         lockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,13 +45,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                 GCMRegister reg = new GCMRegister(MainActivity.this);
                 reg.execute();
-            }
-        });
-
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new LocatePi(MainActivity.this).execute();
             }
         });
     }

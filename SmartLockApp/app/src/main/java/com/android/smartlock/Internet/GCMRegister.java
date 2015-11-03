@@ -25,7 +25,7 @@ public class GCMRegister extends AsyncTask<String, String, String> {
             String token = instanceID.getToken(context.getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.i(TAG, "GCM Registration Token: " + token);
-            Internet gcmsend = new Internet("register", token);
+            Internet gcmsend = new Internet(Constants.getIPAdress(), "register", token);
             Log.d(TAG, "Assigned id is " + gcmsend.getResult());
             Constants.setDeviceId(gcmsend.getResult().split("=")[1]);
         } catch (Exception e) {

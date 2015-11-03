@@ -4,12 +4,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import com.android.smartlock.Constants;
+import com.android.smartlock.Internet.AsyncTaskListener;
+import com.android.smartlock.Internet.LocatePi;
 import com.android.smartlock.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements AsyncTaskListener {
     EditText ipEditText, portEditText, timeoutEditText;
+    Button searchButton;
+    ProgressBar ipSearchProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +28,17 @@ public class SettingsActivity extends AppCompatActivity {
         portEditText.setText(Constants.getPort() + "");
         timeoutEditText = (EditText) findViewById(R.id.timeoutEditText);
         timeoutEditText.setText(Constants.getTimeout() + "");
+        searchButton = (Button) findViewById(R.id.searchButton);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchButton.setVisibility(View.GONE);
+                ipSearchProgress.setProgress(0);
+                ipSearchProgress.setVisibility(View.VISIBLE);
+                new LocatePi(SettingsActivity.this, SettingsActivity.this).execute();
+            }
+        });
+        ipSearchProgress = (ProgressBar) findViewById(R.id.ipSearchProgress);
     }
 
     @Override
@@ -43,5 +61,17 @@ public class SettingsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAsyncTaskCompleted() {
+
+        searchButton.setVisibility(View.VISIBLE);
+        ipSearchProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onAsyncTaskProgressUpdate(int value) {
+        ipSearchProgress.setProgress(value);
     }
 }

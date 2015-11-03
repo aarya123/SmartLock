@@ -34,4 +34,16 @@
                 android:inputType="numberSigned"
                 android:id="@+id/timeoutEditText"/>
     </android.support.design.widget.TextInputLayout>
+    <Button
+            android:id="@+id/searchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search for server"
+            android:layout_gravity="center_horizontal"/>
+    <ProgressBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:id="@+id/ipSearchProgress"
+            android:visibility="gone"/>
 </LinearLayout>

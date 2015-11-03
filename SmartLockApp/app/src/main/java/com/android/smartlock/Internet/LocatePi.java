@@ -5,15 +5,19 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
+import com.android.smartlock.Constants;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class LocatePi extends AsyncTask<String, String, String> {
     Context context;
+    AsyncTaskListener mAsyncTaskListenerListener;
 
-    public LocatePi(Context context) {
+    public LocatePi(AsyncTaskListener asyncTaskListenerListener, Context context) {
         this.context = context;
+        this.mAsyncTaskListenerListener = asyncTaskListenerListener;
     }
 
     @Override
@@ -21,7 +25,7 @@ public class LocatePi extends AsyncTask<String, String, String> {
         Log.d("LocatePi", "Starting search");
         WifiManager wifii = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         DhcpInfo d = wifii.getDhcpInfo();
-        String connections = "";
+        ArrayList<String> ips = new ArrayList<String>();
         InetAddress host;
         try {
             host = InetAddress.getByName(intToIp(d.gateway));
@@ -30,16 +34,34 @@ public class LocatePi extends AsyncTask<String, String, String> {
                 ip[3] = (byte) i;
                 InetAddress address = InetAddress.getByAddress(ip);
                 if (address.isReachable(100)) {
-                    connections += address + ",";
+                    ips.add(address.toString().replace("/", ""));
                 }
+                publishProgress((((i + 1.0) / 255.0) * .75) + "");
             }
-            connections = connections.replace("/", "");
-            connections = connections.substring(0, connections.length() - 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("LocatePi", connections);
-        return connections;
+        for (int i = 0; i < ips.size(); i++) {
+            String ip = ips.get(i);
+            if (new Internet(ip, "ping", "true").getResult().equals("pong")) {
+                Log.d("LocatePi", "Found server at " + ip);
+                return ip;
+            }
+            publishProgress((.75 + ((i + 1) / ips.size()) * .25) + "");
+        }
+        Log.d("LocatePi", "No results :(");
+        return Constants.getIPAdress();
+    }
+
+    @Override
+    protected void onPostExecute(String s) {
+        Constants.setIpAddress(s);
+        mAsyncTaskListenerListener.onAsyncTaskCompleted();
+    }
+
+    @Override
+    protected void onProgressUpdate(String... values) {
+        mAsyncTaskListenerListener.onAsyncTaskProgressUpdate((int) (Double.parseDouble(values[0]) * 100.0));
     }
 
     private String intToIp(int i) {
