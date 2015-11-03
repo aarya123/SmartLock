@@ -10,11 +10,14 @@
             android:id="@+id/button_ping"
             android:text="@string/button_ping"
             android:layout_gravity="center_vertical"
-            android:padding="5dp"
-            android:paddingLeft="5dp"
-            android:paddingTop="5dp"
-            android:paddingRight="5dp"
-            android:paddingBottom="5dp"/>
+            android:padding="5dp"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_search"
+            android:text="Search"
+            android:layout_gravity="center_vertical"
+            android:padding="5dp"/>
 
     <com.android.smartlock.CustomViews.Lock
             android:layout_width="wrap_content"
