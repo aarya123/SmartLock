@@ -15,7 +15,7 @@ public class Lock extends View {
     private static final int DEFAULT_LOCKED_COLOR = 0xfff50057;
     private static final int DEFAULT_UNLOCKED_COLOR = 0xff76ff03;
     private static final int FPS = 1000 / 60;
-    private static final boolean DEFAULT_LOCK_STATUS = false;
+    private static final boolean DEFAULT_LOCK_STATUS = true;
 
 
     private int mLockedBackgroundColor = DEFAULT_LOCKED_COLOR;
@@ -29,12 +29,14 @@ public class Lock extends View {
 
     private GestureDetector mGestureDetector;
 
-    private boolean down = false;
-    private int downCount = 0;
+    private boolean mDown = false;
+    private int mDownCount = 0;
+    private boolean mAnimateLock = false;
 
     private LockDimensions mLockDimensions = new LockDimensions();
 
-    private ShadowInterpolator mShadowInterpolator;
+    private Interpolator mShadowInterpolator;
+    private Interpolator mAnimationInterpolator;
 
     private OnClickListener mOnClickListener;
 
@@ -90,19 +92,19 @@ public class Lock extends View {
     }
 
     private boolean isDown() {
-        if (down && downCount < 30) {
-            downCount++;
+        if (mDown && mDownCount < 30) {
+            mDownCount++;
             postInvalidateDelayed(FPS);
             return false;
         }
-        return down;
+        return mDown;
     }
 
     private void setDown(boolean newDown) {
-        this.down = newDown;
+        this.mDown = newDown;
         if (!newDown) {
             mLockDimensions.tintSize = 0;
-            downCount = 0;
+            mDownCount = 0;
             mShadowInterpolator = null;
         }
         invalidate();
@@ -116,13 +118,14 @@ public class Lock extends View {
         boolean viewNeedsUpdating = mLocked != this.mLocked;
         this.mLocked = mLocked;
         if (viewNeedsUpdating) {
+            mAnimationInterpolator = null;
+            mAnimateLock = true;
             invalidate();
         }
     }
 
     public void toggleLocked() {
-        this.mLocked = !this.mLocked;
-        invalidate();
+        setLocked(!isLocked());
     }
 
     private void init() {
@@ -152,7 +155,6 @@ public class Lock extends View {
         setMeasuredDimension(size, size);
     }
 
-    @SuppressWarnings({"UnnecessaryLocalVariable"})
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -160,19 +162,41 @@ public class Lock extends View {
         canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
         canvas.drawRoundRect(mLockDimensions.lockLeftX, mLockDimensions.lockTopY, mLockDimensions.lockRightX, mLockDimensions.lockBottomY, mLockDimensions.strokeWidth, mLockDimensions.strokeWidth, mLockPaint);
         canvas.drawCircle(mLockDimensions.keyHoleX, mLockDimensions.keyHoleY, mLockDimensions.keyHoleRadius, mLockPaint);
-        canvas.drawLine(mLockDimensions.handleSideLeftX, mLockDimensions.handleSideBottomY, mLockDimensions.handleSideLeftX, mLockDimensions.handleSideTopY, mLockPaint);
-        canvas.drawLine(mLockDimensions.handleSideRightX, mLockDimensions.handleSideBottomY, mLockDimensions.handleSideRightX, mLockDimensions.handleSideTopY, mLockPaint);
+        canvas.drawLine(mLockDimensions.handleSideLeftX, mLockDimensions.handleLeftSideBottomY, mLockDimensions.handleSideLeftX, mLockDimensions.handleSideTopY, mLockPaint);
+        canvas.drawLine(mLockDimensions.handleSideRightX, mLockDimensions.handleRightSideBottomY, mLockDimensions.handleSideRightX, mLockDimensions.handleSideTopY, mLockPaint);
         canvas.drawArc(mLockDimensions.handleArcLeftX, mLockDimensions.handleArcTopY, mLockDimensions.handleArcRightX, mLockDimensions.handleArcBottomY, 180f, 180f, false, mLockPaint);
         canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.tintSize, mShadowPaint);
 
         if (isDown()) {
             if (mShadowInterpolator == null) {
-                mShadowInterpolator = new ShadowInterpolator();
+                mShadowInterpolator = new Interpolator();
             }
             mLockDimensions.tintSize = mShadowInterpolator.getInterpolation() * mLockDimensions.circleRadius;
             if (mLockDimensions.tintSize < mLockDimensions.circleRadius) {
                 postInvalidateDelayed(FPS);
             }
+        } else if (mAnimateLock) {
+            if (mAnimationInterpolator == null) {
+                mAnimationInterpolator = new Interpolator();
+            }
+            if (isLocked()) {
+                mLockDimensions.animateHandle = (1 - mAnimationInterpolator.getInterpolation()) * mLockDimensions.handleRightSideLength;
+                mLockDimensions.update();
+                if (mLockDimensions.animateHandle > 0) {
+                    postInvalidateDelayed(FPS);
+                } else {
+                    mAnimateLock = false;
+                }
+            } else {
+                mLockDimensions.animateHandle = mAnimationInterpolator.getInterpolation() * mLockDimensions.handleRightSideLength;
+                mLockDimensions.update();
+                if (mLockDimensions.animateHandle < mLockDimensions.handleRightSideLength * 2.0) {
+                    postInvalidateDelayed(FPS);
+                } else {
+                    mAnimateLock = false;
+                }
+            }
+
         }
     }
 
@@ -232,8 +256,10 @@ public class Lock extends View {
         float keyHoleY;
         float keyHoleRadius;
 
-        float handleSideLength;
-        float handleSideBottomY;
+        float handleLeftSideLength;
+        float handleRightSideLength;
+        float handleLeftSideBottomY;
+        float handleRightSideBottomY;
         float handleSideTopY;
         float handleSideLeftX;
         float handleSideRightX;
@@ -249,6 +275,7 @@ public class Lock extends View {
         float circleY;
 
         float tintSize;
+        float animateHandle;
 
         public void update() {
             centerX = size / 2.0f;
@@ -266,9 +293,11 @@ public class Lock extends View {
             keyHoleY = (lockTopY + lockBottomY) / 2.0f;
             keyHoleRadius = lockWidth * 0.1f;
 
-            handleSideLength = size * 0.1f;
-            handleSideBottomY = lockTopY;
-            handleSideTopY = lockTopY - handleSideLength;
+            handleRightSideLength = size * 0.1f;
+            handleLeftSideLength = handleRightSideLength + animateHandle;
+            handleLeftSideBottomY = lockTopY;
+            handleRightSideBottomY = lockTopY - animateHandle;
+            handleSideTopY = lockTopY - handleLeftSideLength;
             handleSideLeftX = centerX - lockWidth * 0.25f;
             handleSideRightX = centerX + lockWidth * 0.25f;
 
@@ -286,10 +315,10 @@ public class Lock extends View {
         }
     }
 
-    private class ShadowInterpolator {
+    private class Interpolator {
         private long start;
 
-        public ShadowInterpolator() {
+        public Interpolator() {
             start = System.currentTimeMillis();
         }
 
