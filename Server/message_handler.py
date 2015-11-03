@@ -45,7 +45,8 @@ class MessageHandler:
                 )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
             return 'registered={}'.format(uid)
-
+        elif 'ping' in params:
+            return 'pong'
         # UID Verification
         if 'uid' not in params:
             self.log.error('No device uid sent')
