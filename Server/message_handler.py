@@ -1,7 +1,9 @@
 import logging
-
-from device import Device, generate_id
 from datetime import datetime
+
+from gcmclient import PlainTextMessage
+
+from device import generate_id
 
 
 def get_params(data):
@@ -33,17 +35,16 @@ class MessageHandler:
 
         # Register new device
         if 'register' in params:
-            # TODO fix GCM
-            # response = self.handler.server.gcm.plaintext_request(params['register'], data={"message": "hi!"})
-            # self.log.debug('GCM response: {}'.format(response))
             uid = generate_id(6)
             output = self.handler.server.db_mgr.execute(
-                    '''
-                    INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
-                    VALUES ({}, "{}", "{}", {});
-                    '''.format(uid, params['register'], datetime.now(), 0)
-                )
+                '''
+                INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
+                VALUES ({}, "{}", "{}", {});
+                '''.format(uid, params['register'], datetime.now(), 0)
+            )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
+            self.handler.server.gcm.send(
+                PlainTextMessage(params["register"], {"message": "You've been successfully registered! :)"}))
             return 'registered={}'.format(uid)
         elif 'ping' in params:
             return 'pong'

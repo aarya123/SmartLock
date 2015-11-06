@@ -1,16 +1,15 @@
 import logging
 import os
 import socket
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import sys
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-from gcm import GCM
+from gcmclient import GCM
 
 from RPiHandler import RPiHandler
 from database import DatabaseConnector
 from message_handler import MessageHandler
 from message_sender import MessageSender
-
 
 DB_NAME = 'smartlock.db'
 DEFAULT_PROCESS_TIMEOUT = 1000

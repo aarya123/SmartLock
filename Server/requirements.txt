@@ -1,2 +1,2 @@
-python-gcm
+gcm-client
 RPi.GPIO
