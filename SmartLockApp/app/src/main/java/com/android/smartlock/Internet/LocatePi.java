@@ -36,7 +36,7 @@ public class LocatePi extends AsyncTask<String, String, String> {
                 if (address.isReachable(100)) {
                     ips.add(address.toString().replace("/", ""));
                 }
-                publishProgress((((i + 1.0) / 255.0) * .75) + "");
+                publishProgress((((i + 1.0) / 255.0) * .9) + "");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -47,7 +47,7 @@ public class LocatePi extends AsyncTask<String, String, String> {
                 Log.d("LocatePi", "Found server at " + ip);
                 return ip;
             }
-            publishProgress((.75 + ((i + 1) / ips.size()) * .25) + "");
+            publishProgress((.9 + ((i + 1) / ips.size()) * .1) + "");
         }
         Log.d("LocatePi", "No results :(");
         return Constants.getIPAdress();
