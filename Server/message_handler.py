@@ -1,9 +1,8 @@
 import logging
+
 from datetime import datetime
-
-from gcmclient import PlainTextMessage
-
 from device import generate_id
+from gcmclient import PlainTextMessage
 
 
 def get_params(data):
@@ -35,6 +34,18 @@ class MessageHandler:
 
         # Register new device
         if 'register' in params:
+            # Check if already registered
+            output = self.handler.server.db_mgr.execute(
+                '''
+                SELECT ID, GCM_KEY FROM DEVICES WHERE GCM_KEY="{}";
+                '''.format(params['register']))
+            if len(output) > 0:
+                uid = output[0][0]
+                self.handler.server.gcm.send(
+                    PlainTextMessage(params["register"], {"message": "You are already registered with this lock!"}))
+                return 'registered={}'.format(uid)
+
+            # Register new device
             uid = generate_id(6)
             output = self.handler.server.db_mgr.execute(
                 '''
@@ -48,6 +59,7 @@ class MessageHandler:
             return 'registered={}'.format(uid)
         elif 'ping' in params:
             return 'pong'
+
         # UID Verification
         if 'uid' not in params:
             self.log.error('No device uid sent')
@@ -56,7 +68,7 @@ class MessageHandler:
         try:
             uid = int(params['uid'])
         except TypeError, e:
-            self.log.error('uid={}, {}'.format(uid, e))
+            self.log.error('Invalid uid={}, {}'.format(uid, e))
             return 'Invalid UID'
 
         output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE ID={}'.format(uid))
@@ -64,12 +76,10 @@ class MessageHandler:
             self.log.error('UID [{}] not recognized'.format(uid))
             return 'UID not recognized'
 
-        self.log.info('UID {} RECOGNIZED!!'.format(uid))
+        self.log.info('UID {} RECOGNIZED!!'.format(uid))  # TODO check if approved
 
-        # End-User Functions
-        if 'doorbell' in params:
-            return 'Notify doorbell'  # TODO self.notify_doorbell()
-        elif 'lock_door' in params:
+        # End-user commands
+        if 'lock_door' in params:
             return self.handler.server.rpi.lock_door()
         elif 'unlock_door' in params:
             return self.handler.server.rpi.unlock_door()
