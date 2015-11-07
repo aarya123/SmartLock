@@ -6,12 +6,15 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from gcmclient import GCM
 
-from RPiHandler import RPiHandler
+# from RPiHandler import RPiHandler
 from database import DatabaseConnector
+from doorbell import DoorbellConnector
 from message_handler import MessageHandler
 from message_sender import MessageSender
 
+
 DB_NAME = 'smartlock.db'
+DOORBELL_MAC_ADDRESS = 'a0:02:dc:9a:06:f6'
 DEFAULT_PROCESS_TIMEOUT = 1000
 GCM_ENV = 'GCM_KEY'
 PORT = 8000
@@ -20,7 +23,8 @@ PORT = 8000
 def launch_tcp_server():
     handler = RequestHandler
     database = DatabaseConnector
-    httpd = Server(("", PORT), handler, database, bind_and_activate=False)
+    doorbell = DoorbellConnector
+    httpd = Server(("", PORT), handler, database, doorbell, bind_and_activate=False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
@@ -33,13 +37,16 @@ def launch_tcp_server():
 
 class Server(HTTPServer):
     db_mgr = None
+    doorbell_mgr = None
     gcm = None
     log = None
     rpi = None
 
-    def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, bind_and_activate=True):
+    def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, DoorbellManagerClass,
+                 bind_and_activate=True):
         self.setup_logging()
         self.setup_database(DatabaseManagerClass, DB_NAME)
+        self.setup_doorbell(DoorbellManagerClass, DOORBELL_MAC_ADDRESS)
         if len(sys.argv) == 2:
             self.log.debug('Got gcm key from cli')
             self.setup_gcm_with_key(sys.argv[1])
@@ -51,6 +58,9 @@ class Server(HTTPServer):
 
     def setup_database(self, DatabaseManagerClass, db_name):
         self.db_mgr = DatabaseManagerClass(db_name)
+
+    def setup_doorbell(self, DoorbellManagerClass, doorbell_mac_address):
+        self.doorbell_mgr = DoorbellManagerClass(doorbell_mac_address)
 
     def setup_gcm(self):
         gcm_key = os.getenv(GCM_ENV)
@@ -71,7 +81,8 @@ class Server(HTTPServer):
         self.log.warning('Server completed execution')
 
     def setup_rpi(self):
-        self.rpi = RPiHandler()
+        # self.rpi = RPiHandler()
+        pass
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -86,9 +97,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.server.log.debug('POST recieved')
-        self.process_request()
+        self.process_request(is_post=True)
 
-    def process_request(self, ):
+    def process_request(self, is_post=False):
         if 'Content-Length' in self.headers:
             content_length = 0
             data = ''
