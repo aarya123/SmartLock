@@ -65,9 +65,9 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
 
     @Override
     public void onAsyncTaskCompleted() {
-
         searchButton.setVisibility(View.VISIBLE);
         ipSearchProgress.setVisibility(View.GONE);
+        ipEditText.setText(Constants.getIPAdress());
     }
 
     @Override
