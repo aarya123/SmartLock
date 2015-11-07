@@ -61,6 +61,7 @@ class Server(HTTPServer):
 
     def setup_doorbell(self, DoorbellManagerClass, doorbell_mac_address):
         self.doorbell_mgr = DoorbellManagerClass(doorbell_mac_address)
+        self.log.debug(self.doorbell_mgr.sniff_arp())
 
     def setup_gcm(self):
         gcm_key = os.getenv(GCM_ENV)

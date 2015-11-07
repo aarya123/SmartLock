@@ -1,8 +1,7 @@
 import logging
 import subprocess
 
-from scapy.i2 import ARP
-from scapy.sniff
+from scapy.all import ARP, sniff
 
 
 class DoorbellConnector:
@@ -19,11 +18,11 @@ class DoorbellConnector:
         self.doorbell_mac_address = doorbell_mac_address
         self.log.debug('Set doorbell mac address to {}'.format(doorbell_mac_address))
 
+    def sniff_arp(self):
         network_sniffer = sniff(prn=self.arp_display, filter='arp', store=0, count=0)
+        return network_sniffer
 
     def arp_display(self, pkt):
-        return
-        '''
         if pkt[ARP].op == 1:  # who-has (request)
             if pkt[ARP].psrc == '0.0.0.0':  # ARP Probe
                 device_mac_address = pkt[ARP].hwsrc
@@ -31,7 +30,6 @@ class DoorbellConnector:
                     print 'Doorbell pressed'
                 else:
                     print 'Unknown device probe: {}'.format(device_mac_address)
-        '''
 
     def __del__(self):
         pass
