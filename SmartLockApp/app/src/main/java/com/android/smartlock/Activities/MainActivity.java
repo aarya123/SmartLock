@@ -3,6 +3,7 @@ package com.android.smartlock.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,15 +11,20 @@ import android.widget.Button;
 import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.CustomViews.Lock;
-import com.android.smartlock.Internet.GCMRegister;
-import com.android.smartlock.Internet.LockDoor;
-import com.android.smartlock.Internet.UnlockDoor;
+import com.android.smartlock.Internet.*;
 import com.android.smartlock.R;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
+public class MainActivity extends AppCompatActivity implements AsyncTaskListener {
 
     Button pingButton;
     Lock lockButton;
+    ScheduledExecutorService mScheduler;
+    PiPinger mPiPinger = new PiPinger(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +53,28 @@ public class MainActivity extends AppCompatActivity {
                 reg.execute();
             }
         });
+
+    }
+
+    @Override
+    protected void onResume() {
+        scheduleLocator();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        pauseLocator();
+        super.onPause();
+    }
+
+    private void scheduleLocator() {
+        mScheduler = Executors.newScheduledThreadPool(1);
+        mScheduler.scheduleAtFixedRate(mPiPinger, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private void pauseLocator() {
+        mScheduler.shutdown();
     }
 
     @Override
@@ -65,4 +93,21 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onAsyncTaskCompleted() {
+        Log.d("Main", "Triggered!");
+        if (mPiPinger.isPiVisible()) {
+            lockButton.setVisibility(View.VISIBLE);
+        } else {
+            lockButton.setVisibility(View.INVISIBLE);
+        }
+        lockButton.invalidate();
+    }
+
+    @Override
+    public void onAsyncTaskProgressUpdate(int value) {
+        throw new UnsupportedOperationException("onAsyncTaskProgressUpdate in MainActivity not implemented");
+    }
+
 }
