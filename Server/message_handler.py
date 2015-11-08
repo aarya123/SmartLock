@@ -82,8 +82,8 @@ class MessageHandler:
 
         # End-user commands
         if 'lock_door' in params:
-            self.handler.server.notify_all(LOCKED_DOOR_MSG)
-            return self.handler.server.rpi.lock_door()
+            self.handler.server.rpi.lock_door()
+            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
         elif 'unlock_door' in params:
-            self.handler.server.notify_all(UNLOCKED_DOOR_MSG)
-            return self.handler.server.rpi.unlock_door()
+            self.handler.server.rpi.unlock_door()
+            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
