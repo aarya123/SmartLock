@@ -1,5 +1,7 @@
 import logging
 import time
+
+from constants import LOCKED, UNLOCKED
 from threading import Lock
 
 import RPi.GPIO as GPIO
@@ -12,10 +14,13 @@ class RPiHandler:
     pwm = None
     lock = None
     log = None
+    isLocked = None
 
     def __init__(self, positive=20, negative=16, pwm_pin=21):
         self.log = logging.getLogger('RPiHandler')
         self.log.setLevel(logging.DEBUG)
+
+        self.isLocked = LOCKED
 
         self.postive_pin = positive
         self.negative_pin = negative
@@ -46,6 +51,7 @@ class RPiHandler:
         self.pwm.stop()
         self.lock.release()
         self.log.info('Locking door complete')
+        self.isLocked = LOCKED
         return "Done!"
 
     def unlock_door(self, ):
@@ -58,6 +64,7 @@ class RPiHandler:
         GPIO.output(self.postive_pin, 0)
         GPIO.output(self.negative_pin, 0)
         self.pwm.stop()
-        self.log.info('Unlocking door complete')
         self.lock.release()
+        self.log.info('Unlocking door complete')
+        self.isLocked = UNLOCKED
         return "Done!"

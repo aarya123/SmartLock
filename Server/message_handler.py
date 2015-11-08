@@ -4,6 +4,8 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
+from constants import ALREADY_REGISTERED_MSG, LOCKED_DOOR_MSG, REGISTRATION_SUCCESS_MSG, UNLOCKED_DOOR_MSG
+
 
 def get_params(data):
     param_list = data.split('\n')
@@ -42,7 +44,7 @@ class MessageHandler:
             if len(output) > 0:
                 uid = output[0][0]
                 self.handler.server.gcm.send(
-                    PlainTextMessage(params["register"], {"message": "You are already registered with this lock!"}))
+                    PlainTextMessage(params["register"], {"message": ALREADY_REGISTERED_MSG}))
                 return 'registered={}'.format(uid)
 
             # Register new device
@@ -55,10 +57,10 @@ class MessageHandler:
             )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
             self.handler.server.gcm.send(
-                PlainTextMessage(params["register"], {"message": "You've been successfully registered! :)"}))
+                PlainTextMessage(params["register"], {"message": REGISTRATION_SUCCESS_MSG}))
             return 'registered={}'.format(uid)
         elif 'ping' in params:
-            return 'pong'
+            return 'pong\nstate={}'.format(self.handler.server.rpi.isLocked)
 
         # UID Verification
         if 'uid' not in params:
@@ -68,7 +70,7 @@ class MessageHandler:
         try:
             uid = int(params['uid'])
         except TypeError, e:
-            self.log.error('Invalid uid={}, {}'.format(uid, e))
+            self.log.error('Invalid uid={}, {}'.format(params['uid'], e))
             return 'Invalid UID'
 
         output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE ID={}'.format(uid))
@@ -80,6 +82,8 @@ class MessageHandler:
 
         # End-user commands
         if 'lock_door' in params:
+            self.handler.server.notify_all(LOCKED_DOOR_MSG)
             return self.handler.server.rpi.lock_door()
         elif 'unlock_door' in params:
+            self.handler.server.notify_all(UNLOCKED_DOOR_MSG)
             return self.handler.server.rpi.unlock_door()

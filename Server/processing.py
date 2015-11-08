@@ -72,12 +72,15 @@ class Server(HTTPServer):
         self.log.info('Server initialized')
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
 
-    def notify_doorbell(self):
-        self.log.debug('Doorbell press detected')
+    def notify_all(self, msg):
         for registered_gcm_key in self.db_mgr.execute('SELECT GCM_KEY FROM DEVICES'):
             self.log.debug('Send doorbell pressed gcm: {}'.format(registered_gcm_key))
             self.gcm.send(
-                    PlainTextMessage(registered_gcm_key, {"message": "Your doorbell was pressed!"}))
+                    PlainTextMessage(registered_gcm_key, {'message': msg}))
+
+    def notify_doorbell(self):
+        self.log.debug('Doorbell press detected')
+        self.notify_all('Your doorbell was pressed!')
 
     def setup_database(self, DatabaseManagerClass, db_name):
         self.db_mgr = DatabaseManagerClass(db_name)
