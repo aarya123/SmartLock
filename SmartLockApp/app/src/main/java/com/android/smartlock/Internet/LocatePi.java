@@ -43,8 +43,11 @@ public class LocatePi extends AsyncTask<String, String, String> {
         }
         for (int i = 0; i < ips.size(); i++) {
             String ip = ips.get(i);
-            if (new Internet(ip, "ping", "true").getResult().equals("pong")) {
-                Log.d("LocatePi", "Found server at " + ip);
+            String response = new Internet(ip, "ping", "true").getResult();
+            if (response.contains("pong")) {
+                Log.d("LocatePi", "isLocked_raw=" + response.split("state=")[1]);
+                Boolean isLocked = Boolean.getBoolean(response.split("state=")[1]);
+                Log.d("LocatePi", "Found server at " + ip + ", isLocked=" + isLocked);
                 return ip;
             }
             publishProgress((.9 + ((i + 1) / ips.size()) * .1) + "");
