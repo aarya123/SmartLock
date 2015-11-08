@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 
 from scapy.all import ARP, sniff
@@ -34,6 +35,7 @@ class DoorbellConnector:
                     if device_mac_address == self.doorbell_mac_address:
                         self.log.info('Doorbell pressed')
                         self.server.notify_all('Your doorbell was pressed!')
+                        os.system('mpg321 -a bluetooth -g 15 john_cena.mp3')
                     else:
                         self.log.debug('Unknown device probe: {}'.format(device_mac_address))
 
