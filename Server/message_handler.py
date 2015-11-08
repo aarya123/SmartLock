@@ -4,7 +4,7 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
-from constants import ALREADY_REGISTERED_MSG, LOCKED_DOOR_MSG, REGISTRATION_SUCCESS_MSG, UNLOCKED_DOOR_MSG
+from constants import ALREADY_REGISTERED_MSG, REGISTRATION_SUCCESS_MSG
 
 
 def get_params(data):
