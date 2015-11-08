@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
             @Override
             public void onClick(View view) {
                 if (lockButton.isLocked()) {
-                    new LockDoor(MainActivity.this).execute();
-                } else {
                     new UnlockDoor(MainActivity.this).execute();
+                } else {
+                    new LockDoor(MainActivity.this).execute();
                 }
             }
         });
@@ -98,11 +98,8 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
     public void onAsyncTaskCompleted() {
         Log.d("Main", "Triggered!");
         if (mPiPinger.isPiVisible()) {
-            lockButton.setVisibility(View.VISIBLE);
-        } else {
-            lockButton.setVisibility(View.INVISIBLE);
+            lockButton.setLocked(mPiPinger.isLocked());
         }
-        lockButton.invalidate();
     }
 
     @Override
