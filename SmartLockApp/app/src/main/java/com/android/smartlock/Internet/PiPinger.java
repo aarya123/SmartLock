@@ -5,7 +5,7 @@ import com.android.smartlock.Constants;
 public class PiPinger implements Runnable {
     AsyncTaskListener mAsyncTaskListener;
     private boolean mPiVisible = true;
-    private boolean lockStatus = true;
+    private boolean lockStatus = false;
 
     public PiPinger(AsyncTaskListener mAsyncTaskListener) {
         this.mAsyncTaskListener = mAsyncTaskListener;
@@ -22,24 +22,16 @@ public class PiPinger implements Runnable {
             if (lock != lockStatus) {
                 viewNeedsUpdating = true;
             }
-            setLocked(lock);
+            lockStatus = lock;
         } catch (Exception e) {
             result = false;
         }
         if (result != mPiVisible) {
             viewNeedsUpdating = true;
         }
-        setIsVisible(result);
+        mPiVisible = result;
         if (viewNeedsUpdating) {
             mAsyncTaskListener.onAsyncTaskCompleted();
-        }
-    }
-
-    private void setIsVisible(boolean visible) {
-        boolean viewNeedsUpdating = mPiVisible != visible;
-        mPiVisible = visible;
-        if (viewNeedsUpdating) {
-
         }
     }
 
@@ -49,9 +41,5 @@ public class PiPinger implements Runnable {
 
     public boolean isLocked() {
         return lockStatus;
-    }
-
-    private void setLocked(boolean lockStatus) {
-        this.lockStatus = lockStatus;
     }
 }
