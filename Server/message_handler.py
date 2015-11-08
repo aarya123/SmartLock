@@ -4,7 +4,7 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
-from constants import ALREADY_REGISTERED_MSG, LOCKED_DOOR_MSG, REGISTRATION_SUCCESS_MSG, UNLOCKED_DOOR_MSG
+from constants import ALREADY_REGISTERED_MSG, REGISTRATION_SUCCESS_MSG
 
 
 def get_params(data):
@@ -82,8 +82,8 @@ class MessageHandler:
 
         # End-user commands
         if 'lock_door' in params:
-            self.handler.server.notify_all(LOCKED_DOOR_MSG)
-            return self.handler.server.rpi.lock_door()
+            self.handler.server.rpi.lock_door()
+            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
         elif 'unlock_door' in params:
-            self.handler.server.notify_all(UNLOCKED_DOOR_MSG)
-            return self.handler.server.rpi.unlock_door()
+            self.handler.server.rpi.unlock_door()
+            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)

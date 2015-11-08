@@ -49,9 +49,9 @@ class RPiHandler:
         GPIO.output(self.postive_pin, 0)
         GPIO.output(self.negative_pin, 0)
         self.pwm.stop()
+        self.isLocked = LOCKED
         self.lock.release()
         self.log.info('Locking door complete')
-        self.isLocked = LOCKED
         return "Done!"
 
     def unlock_door(self, ):
@@ -64,7 +64,7 @@ class RPiHandler:
         GPIO.output(self.postive_pin, 0)
         GPIO.output(self.negative_pin, 0)
         self.pwm.stop()
+        self.isLocked = UNLOCKED
         self.lock.release()
         self.log.info('Unlocking door complete')
-        self.isLocked = UNLOCKED
         return "Done!"
