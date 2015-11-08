@@ -14,7 +14,7 @@ public class PiPinger implements Runnable {
     public void run() {
         boolean result;
         try {
-            result = new Internet(Constants.getIPAdress(), "ping", "true").getResult().equals("pong");
+            result = new Internet(Constants.getIPAdress(), "ping", "true").getResult().contains("pong");
         } catch (Exception e) {
             result = false;
         }

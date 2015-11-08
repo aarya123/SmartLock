@@ -33,7 +33,7 @@ class DoorbellConnector:
                     device_mac_address = pkt[ARP].hwsrc
                     if device_mac_address == self.doorbell_mac_address:
                         self.log.info('Doorbell pressed')
-                        self.server.notify_doorbell()
+                        self.server.notify_all('Your doorbell was pressed!')
                     else:
                         self.log.debug('Unknown device probe: {}'.format(device_mac_address))
 

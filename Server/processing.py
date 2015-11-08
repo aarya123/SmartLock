@@ -78,10 +78,6 @@ class Server(HTTPServer):
             self.gcm.send(
                     PlainTextMessage(registered_gcm_key, {'message': msg}))
 
-    def notify_doorbell(self):
-        self.log.debug('Doorbell press detected')
-        self.notify_all('Your doorbell was pressed!')
-
     def setup_database(self, DatabaseManagerClass, db_name):
         self.db_mgr = DatabaseManagerClass(db_name)
 
