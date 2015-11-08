@@ -2,16 +2,28 @@ import logging
 import os
 import socket
 import sys
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from gcmclient import GCM, PlainTextMessage
+from multiprocessing import Process
 
-from gcmclient import GCM
-
-from RPiHandler import RPiHandler
 from database import DatabaseConnector
 from message_handler import MessageHandler
 from message_sender import MessageSender
 
+try:
+    from doorbell import DoorbellConnector
+except ImportError:
+    DoorbellConnector = None
+
+try:
+    from RPiHandler import RPiHandler
+except ImportError:
+    RPiHandler = None
+
+
 DB_NAME = 'smartlock.db'
+DOORBELL_MAC_ADDRESS = 'a0:02:dc:9a:06:f6'
 DEFAULT_PROCESS_TIMEOUT = 1000
 GCM_ENV = 'GCM_KEY'
 PORT = 8000
@@ -20,7 +32,8 @@ PORT = 8000
 def launch_tcp_server():
     handler = RequestHandler
     database = DatabaseConnector
-    httpd = Server(("", PORT), handler, database, bind_and_activate=False)
+    doorbell = DoorbellConnector
+    httpd = Server(("", PORT), handler, database, doorbell, bind_and_activate=False)
     httpd.allow_reuse_address = True
     httpd.server_bind()
     httpd.server_activate()
@@ -33,24 +46,48 @@ def launch_tcp_server():
 
 class Server(HTTPServer):
     db_mgr = None
+    doorbell_proc = None
     gcm = None
     log = None
     rpi = None
 
-    def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, bind_and_activate=True):
-        self.setup_logging()
-        self.setup_database(DatabaseManagerClass, DB_NAME)
+    def __init__(self, server_address, RequestHandlerClass, DatabaseManagerClass, DoorbellManagerClass,
+                 bind_and_activate=True):
+        self.log = logging.getLogger('Server')
+        self.log.setLevel(logging.DEBUG)
+
+        self.log.debug('Retrieving gcm key')
         if len(sys.argv) == 2:
-            self.log.debug('Got gcm key from cli')
             self.setup_gcm_with_key(sys.argv[1])
+            self.log.debug('Got gcm key from cli')
         else:
-            self.log.debug('Got gcm key from environment')
             self.setup_gcm()
+            self.log.debug('Got gcm key from environment')
+
+        self.setup_database(DatabaseManagerClass, DB_NAME)
+        self.setup_doorbell(DoorbellManagerClass, DOORBELL_MAC_ADDRESS)
+
         self.setup_rpi()
+
+        self.log.info('Server initialized')
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+
+    def notify_doorbell(self):
+        self.log.debug('Doorbell press detected')
+        for registered_gcm_key in self.db_mgr.execute('SELECT GCM_KEY FROM DEVICES'):
+            self.log.debug('Send doorbell pressed gcm: {}'.format(registered_gcm_key))
+            self.gcm.send(
+                    PlainTextMessage(registered_gcm_key, {"message": "Your doorbell was pressed!"}))
 
     def setup_database(self, DatabaseManagerClass, db_name):
         self.db_mgr = DatabaseManagerClass(db_name)
+
+    def setup_doorbell(self, DoorbellManagerClass, doorbell_mac_address):
+        if not DoorbellConnector:
+            return
+        doorbell_mgr = DoorbellManagerClass(self, doorbell_mac_address)
+        self.doorbell_proc = Process(target=doorbell_mgr.sniff_arp)
+        self.doorbell_proc.start()
 
     def setup_gcm(self):
         gcm_key = os.getenv(GCM_ENV)
@@ -62,16 +99,16 @@ class Server(HTTPServer):
         self.gcm = GCM(gcm_key)
         self.log.debug('Configured gcm service')
 
-    def setup_logging(self):
-        self.log = logging.getLogger('Server')
-        self.log.setLevel(logging.DEBUG)
-        self.log.debug('Configured logger')
+    def setup_rpi(self):
+        if not RPiHandler:
+            return
+        self.rpi = RPiHandler()
 
     def __del__(self):
-        self.log.warning('Server completed execution')
-
-    def setup_rpi(self):
-        self.rpi = RPiHandler()
+        if DoorbellConnector:
+            self.log.debug('Halting doorbell arp sniffer')
+            self.doorbell_proc.join()
+        self.log.warning('Server halted execution')
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -86,9 +123,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.server.log.debug('POST recieved')
-        self.process_request()
+        self.process_request(is_post=True)
 
-    def process_request(self, ):
+    def process_request(self, is_post=False):
         if 'Content-Length' in self.headers:
             content_length = 0
             data = ''
@@ -109,7 +146,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.server.log.error('Data could not be parsed from message.')
                 return
 
-            self.server.log.info('msg_received: {}'.format(data))
+            self.server.log.info('msg_received: "{}"'.format(data.replace('\n', ' \\n ')))
             response = MessageHandler(self).__call__(data)
             if response:
                 MessageSender(self).__call__(response)
