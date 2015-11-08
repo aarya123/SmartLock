@@ -21,7 +21,11 @@ public class MyGcmListenerService extends GcmListenerService {
         String message = data.getString("message");
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
-        sendNotification(message);
+        if (!(message.equals("0") || message.equals("1"))) {
+            sendNotification(message);
+        } else {
+            //TODO: Update UI?
+        }
     }
 
     private void sendNotification(String message) {
