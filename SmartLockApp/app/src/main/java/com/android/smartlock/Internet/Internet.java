@@ -49,6 +49,7 @@ public class Internet {
         } catch (Exception exc) {
             modifiedSentence = "-1";
         }
+        Log.d("TCP", modifiedSentence);
         this.result = modifiedSentence;
     }
 
