@@ -229,10 +229,10 @@ public class Lock extends View {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            Lock.this.toggleLocked();
             if (mOnClickListener != null) {
                 mOnClickListener.onClick(Lock.this);
             }
+            Lock.this.toggleLocked();
             return true;
         }
     }
