@@ -4,8 +4,8 @@ import com.android.smartlock.Constants;
 
 public class PiPinger implements Runnable {
     AsyncTaskListener mAsyncTaskListener;
-    private boolean mPiVisible = true;
-    private boolean lockStatus = false;
+    private boolean mPiVisible;
+    private boolean lockStatus;
 
     public PiPinger(AsyncTaskListener mAsyncTaskListener) {
         this.mAsyncTaskListener = mAsyncTaskListener;
