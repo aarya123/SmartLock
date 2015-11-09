@@ -16,7 +16,7 @@ public class PiPinger implements Runnable {
         try {
             String[] response = new Internet(Constants.getIPAdress(), "ping", "true").getResult().split("\n");
             mPiVisible = response[0].contains("pong");
-            lockStatus = Boolean.parseBoolean(response[1].split("=")[1]);
+            lockStatus = !response[1].split("=")[1].equals("0");
         } catch (Exception e) {
             mPiVisible = false;
         }
