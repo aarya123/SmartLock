@@ -34,21 +34,18 @@ public class LocatePi extends AsyncTask<String, String, String> {
                 ip[3] = (byte) i;
                 InetAddress address = InetAddress.getByAddress(ip);
                 if (address.isReachable(100)) {
-                    ips.add(address.toString().replace("/", ""));
+                    String ipString = address.toString().replace("/", "");
+                    String response = new Internet(ipString, "ping", "true").getResult();
+                    if (response.contains("pong")) {
+                        publishProgress("1.0");
+                        Log.d("LocatePi", "Found server at " + ipString);
+                        return ipString;
+                    }
                 }
-                publishProgress((((i + 1.0) / 255.0) * .9) + "");
+                publishProgress(((i + 1.0) / 255.0) + "");
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        for (int i = 0; i < ips.size(); i++) {
-            String ip = ips.get(i);
-            String response = new Internet(ip, "ping", "true").getResult();
-            if (response.contains("pong")) {
-                Log.d("LocatePi", "Found server at " + ip);
-                return ip;
-            }
-            publishProgress((.9 + ((i + 1) / ips.size()) * .1) + "");
         }
         Log.d("LocatePi", "No results :(");
         return Constants.getIPAdress();
