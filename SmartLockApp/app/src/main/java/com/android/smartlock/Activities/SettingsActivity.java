@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.Internet.AsyncTaskListener;
 import com.android.smartlock.Internet.GCMRegister;
@@ -34,10 +33,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String msg = "TCP Send: " + Constants.getIPAdress();
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-                GCMRegister reg = new GCMRegister(SettingsActivity.this.getApplicationContext());
-                reg.execute();
+                new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
             }
         });
         searchButton = (Button) findViewById(R.id.searchButton);
@@ -77,6 +73,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
 
     @Override
     public void onAsyncTaskCompleted() {
+        new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
         searchButton.setVisibility(View.VISIBLE);
         ipSearchProgress.setVisibility(View.GONE);
         ipEditText.setText(Constants.getIPAdress());
