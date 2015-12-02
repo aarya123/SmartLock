@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -14,17 +15,21 @@ public class Lock extends View {
 
     private static final int DEFAULT_LOCKED_COLOR = 0xfff50057;
     private static final int DEFAULT_UNLOCKED_COLOR = 0xff76ff03;
+    private static final int DEFAULT_DISABLED_COLOR = 0xff9e9e9e;
     private static final int FPS = 1000 / 60;
     private static final boolean DEFAULT_LOCK_STATUS = true;
-
+    private static final boolean DEFAULT_ENABLED_STATUS = true;
 
     private int mLockedBackgroundColor = DEFAULT_LOCKED_COLOR;
     private int mUnlockedBackgroundColor = DEFAULT_UNLOCKED_COLOR;
+    private int mDisabledBackgroundColor = DEFAULT_DISABLED_COLOR;
     private boolean mLocked = DEFAULT_LOCK_STATUS;
+    private boolean mEnabled = DEFAULT_ENABLED_STATUS;
 
     private Paint mLockPaint;
     private Paint mLockedBackgroundPaint;
     private Paint mUnlockedBackgroundPaint;
+    private Paint mDisabledBackgroundPaint;
     private Paint mShadowPaint;
 
     private GestureDetector mGestureDetector;
@@ -58,7 +63,9 @@ public class Lock extends View {
         try {
             mLockedBackgroundColor = typedArray.getColor(R.styleable.Lock_lockedBackgroundColor, DEFAULT_LOCKED_COLOR);
             mUnlockedBackgroundColor = typedArray.getColor(R.styleable.Lock_lockedBackgroundColor, DEFAULT_UNLOCKED_COLOR);
+            mDisabledBackgroundColor = typedArray.getColor(R.styleable.Lock_disabledBackgroundColor, DEFAULT_DISABLED_COLOR);
             mLocked = typedArray.getBoolean(R.styleable.Lock_locked, DEFAULT_LOCK_STATUS);
+            mEnabled = typedArray.getBoolean(R.styleable.Lock_enabled, DEFAULT_LOCK_STATUS);
         } finally {
             typedArray.recycle();
         }
@@ -74,7 +81,7 @@ public class Lock extends View {
         this.mLockedBackgroundColor = mLockedColor;
         mLockedBackgroundPaint.setColor(mLockedBackgroundColor);
         if (viewNeedsUpdating) {
-            invalidate();
+            invalidateLock();
         }
     }
 
@@ -87,7 +94,20 @@ public class Lock extends View {
         this.mUnlockedBackgroundColor = mUnlockedColor;
         mUnlockedBackgroundPaint.setColor(mUnlockedBackgroundColor);
         if (viewNeedsUpdating) {
-            invalidate();
+            invalidateLock();
+        }
+    }
+
+    public int getDisabledColor() {
+        return mDisabledBackgroundColor;
+    }
+
+    public void setDisabledColor(int mDisabledColor) {
+        boolean viewNeedsUpdating = mDisabledColor != this.mDisabledBackgroundColor;
+        this.mDisabledBackgroundColor = mDisabledColor;
+        mDisabledBackgroundPaint.setColor(mDisabledBackgroundColor);
+        if (viewNeedsUpdating) {
+            invalidateLock();
         }
     }
 
@@ -107,7 +127,7 @@ public class Lock extends View {
             mDownCount = 0;
             mShadowInterpolator = null;
         }
-        invalidate();
+        invalidateLock();
     }
 
     public boolean isLocked() {
@@ -120,7 +140,19 @@ public class Lock extends View {
         if (viewNeedsUpdating) {
             mAnimationInterpolator = null;
             mAnimateLock = true;
-            invalidate();
+            invalidateLock();
+        }
+    }
+
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    public void setEnabled(boolean mEnabled) {
+        boolean viewNeedsUpdating = mEnabled != this.mEnabled;
+        this.mEnabled = mEnabled;
+        if (viewNeedsUpdating) {
+            invalidateLock();
         }
     }
 
@@ -132,16 +164,19 @@ public class Lock extends View {
         mLockPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLockedBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mUnlockedBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mDisabledBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         mLockPaint.setColor(0xff424242);
         mLockedBackgroundPaint.setColor(mLockedBackgroundColor);
         mUnlockedBackgroundPaint.setColor(mUnlockedBackgroundColor);
+        mDisabledBackgroundPaint.setColor(mDisabledBackgroundColor);
         mShadowPaint.setColor(0x66000000);
 
         mLockPaint.setStyle(Paint.Style.STROKE);
         mLockedBackgroundPaint.setStyle(Paint.Style.FILL);
         mUnlockedBackgroundPaint.setStyle(Paint.Style.FILL);
+        mDisabledBackgroundPaint.setStyle(Paint.Style.FILL);
         mShadowPaint.setStyle(Paint.Style.FILL);
 
         mGestureDetector = new GestureDetector(getContext(), new LockSimpleGestureListener());
@@ -159,7 +194,7 @@ public class Lock extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.circleRadius, isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint);
+        canvas.drawCircle(mLockDimensions.circleX, mLockDimensions.circleY, mLockDimensions.circleRadius, isEnabled() ? isLocked() ? mLockedBackgroundPaint : mUnlockedBackgroundPaint : mDisabledBackgroundPaint);
         canvas.drawRoundRect(mLockDimensions.lockLeftX, mLockDimensions.lockTopY, mLockDimensions.lockRightX, mLockDimensions.lockBottomY, mLockDimensions.strokeWidth, mLockDimensions.strokeWidth, mLockPaint);
         canvas.drawCircle(mLockDimensions.keyHoleX, mLockDimensions.keyHoleY, mLockDimensions.keyHoleRadius, mLockPaint);
         canvas.drawLine(mLockDimensions.handleSideLeftX, mLockDimensions.handleLeftSideBottomY, mLockDimensions.handleSideLeftX, mLockDimensions.handleSideTopY, mLockPaint);
@@ -202,14 +237,18 @@ public class Lock extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        boolean result = mGestureDetector.onTouchEvent(event);
-        if (!result) {
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                setDown(false);
-                result = true;
+        if (isEnabled()) {
+            boolean result = mGestureDetector.onTouchEvent(event);
+            if (!result) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    setDown(false);
+                    result = true;
+                }
             }
+            return result;
+        } else {
+            return false;
         }
-        return result;
     }
 
     public OnClickListener getOnClickListener() {
@@ -218,6 +257,19 @@ public class Lock extends View {
 
     public void setOnClickListener(OnClickListener mOnClickListener) {
         this.mOnClickListener = mOnClickListener;
+    }
+
+    private void invalidateLock() {
+        try {
+            if (Looper.myLooper().equals(Looper.getMainLooper())) {
+                invalidate();
+            } else {
+                postInvalidate();
+            }
+        } catch (NullPointerException e) {
+            postInvalidate();
+        }
+
     }
 
     private class LockSimpleGestureListener extends GestureDetector.SimpleOnGestureListener {

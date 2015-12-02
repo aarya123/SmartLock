@@ -2,7 +2,9 @@
 <resources>
     <declare-styleable name="Lock">
         <attr name="locked" format="boolean"/>
+        <attr name="enabled" format="boolean"/>
         <attr name="unlockedBackgroundColor" format="color"/>
         <attr name="lockedBackgroundColor" format="color"/>
+        <attr name="disabledBackgroundColor" format="color"/>
     </declare-styleable>
 </resources>
