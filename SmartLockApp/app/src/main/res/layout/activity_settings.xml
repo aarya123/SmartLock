@@ -35,6 +35,12 @@
                 android:id="@+id/timeoutEditText"/>
     </android.support.design.widget.TextInputLayout>
     <Button
+            android:id="@+id/registerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Register with server"
+            android:layout_gravity="center_horizontal"/>
+    <Button
             android:id="@+id/searchButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,5 +51,6 @@
             android:layout_height="wrap_content"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:id="@+id/ipSearchProgress"
+            android:layout_margin="20dp"
             android:visibility="gone"/>
 </LinearLayout>

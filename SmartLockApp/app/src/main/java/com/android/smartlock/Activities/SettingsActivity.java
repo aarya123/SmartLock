@@ -8,14 +8,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.Internet.AsyncTaskListener;
+import com.android.smartlock.Internet.GCMRegister;
 import com.android.smartlock.Internet.LocatePi;
 import com.android.smartlock.R;
 
 public class SettingsActivity extends AppCompatActivity implements AsyncTaskListener {
     EditText ipEditText, portEditText, timeoutEditText;
-    Button searchButton;
+    Button searchButton, registerButton;
     ProgressBar ipSearchProgress;
 
     @Override
@@ -28,6 +30,16 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
         portEditText.setText(Constants.getPort() + "");
         timeoutEditText = (EditText) findViewById(R.id.timeoutEditText);
         timeoutEditText.setText(Constants.getTimeout() + "");
+        registerButton = (Button) findViewById(R.id.registerButton);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String msg = "TCP Send: " + Constants.getIPAdress();
+                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+                GCMRegister reg = new GCMRegister(SettingsActivity.this.getApplicationContext());
+                reg.execute();
+            }
+        });
         searchButton = (Button) findViewById(R.id.searchButton);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override

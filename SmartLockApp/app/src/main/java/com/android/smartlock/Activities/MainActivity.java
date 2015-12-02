@@ -7,11 +7,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 import com.android.smartlock.Constants;
 import com.android.smartlock.CustomViews.Lock;
-import com.android.smartlock.Internet.*;
+import com.android.smartlock.Internet.AsyncTaskListener;
+import com.android.smartlock.Internet.LockDoor;
+import com.android.smartlock.Internet.PiPinger;
+import com.android.smartlock.Internet.UnlockDoor;
 import com.android.smartlock.R;
 
 import java.util.concurrent.Executors;
@@ -21,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements AsyncTaskListener {
 
-    Button pingButton;
     Lock lockButton;
     ScheduledExecutorService mScheduler;
     PiPinger mPiPinger = new PiPinger(this);
@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
         Constants.init(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        pingButton = (Button) findViewById(R.id.button_ping);
         lockButton = (Lock) findViewById(R.id.lockButton);
         lockButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,16 +40,6 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
                 } else {
                     new LockDoor(MainActivity.this).execute();
                 }
-            }
-        });
-
-        pingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String msg = "TCP Send: " + Constants.getIPAdress();
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
-                GCMRegister reg = new GCMRegister(MainActivity.this);
-                reg.execute();
             }
         });
 

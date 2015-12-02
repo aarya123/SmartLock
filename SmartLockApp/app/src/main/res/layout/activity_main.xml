@@ -4,14 +4,6 @@
               android:padding="16dp"
               android:orientation="vertical">
 
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/button_ping"
-            android:text="@string/button_ping"
-            android:layout_gravity="center_vertical"
-            android:padding="5dp"/>
-
     <com.android.smartlock.CustomViews.Lock
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
