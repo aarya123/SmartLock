@@ -18,5 +18,3 @@ class Device:
 
     def approve(self):
         self.approved = 1
-
-
