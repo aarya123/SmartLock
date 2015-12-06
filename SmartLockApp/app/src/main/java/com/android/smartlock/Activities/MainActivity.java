@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
         Log.d("Main", "Triggered!");
         if (mPiPinger.isPiVisible()) {
             lockButton.setLocked(mPiPinger.isLocked());
-            lockButton.setEnabled(true);
+            lockButton.setEnabled(Constants.isApproved());
         } else {
             lockButton.setEnabled(false);
         }

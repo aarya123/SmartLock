@@ -14,9 +14,13 @@ public class PiPinger implements Runnable {
     @Override
     public void run() {
         try {
-            String[] response = new Internet(Constants.getIPAddress(), "ping", "true").getResult().split("\n");
+            String[] response = new Internet(Constants.getIPAddress(), "ping", "true", "uid", Constants.getDeviceId()).getResult().split("\n");
             mPiVisible = response[0].contains("pong");
             lockStatus = !response[1].split("=")[1].equals("0");
+            boolean approved = response[2].split("=")[1].equals("1");
+            if (approved != Constants.isApproved()) {
+                Constants.setApproved(approved);
+            }
         } catch (Exception e) {
             mPiVisible = false;
         }
