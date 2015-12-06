@@ -32,7 +32,8 @@ class DatabaseConnector:
                         ID          INT     PRIMARY KEY     NOT NULL,
                         GCM_KEY     TEXT    NOT NULL,
                         CREATED_ON  TEXT    NOT NULL,
-                        APPROVED    INT     NOT NULL
+                        APPROVED    INT     NOT NULL,
+                        PERMS       INT     DEFAULT     0
                     );
                 '''
             )

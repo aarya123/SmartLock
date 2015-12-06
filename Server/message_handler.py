@@ -4,7 +4,8 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
-from constants import ALREADY_REGISTERED_MSG, REGISTRATION_SUCCESS_MSG
+from constants import ADMIN_SUCCESS_MSG, ALREADY_REGISTERED_MSG, REGISTRATION_PENDING_MSG, REGISTRATION_SUCCESS_MSG
+from constants import LOCKED, UNLOCKED
 
 
 def get_params(data):
@@ -36,31 +37,53 @@ class MessageHandler:
 
         # Register new device
         if 'register' in params:
+            # Check if first device to register
+            output = self.handler.server.db_mgr.execute(
+                '''
+                SELECT ID FROM DEVICES;
+                '''.format(params['register']))
+            if len(output) == 0:
+                uid = generate_id(6)
+                approved = 1
+                output = self.handler.server.db_mgr.execute(
+                    '''
+                    INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
+                    VALUES ({}, "{}", "{}", {});
+                    '''.format(uid, params['register'], datetime.now(), approved)
+                )
+                self.log.debug('New admin assigned: {}, {}'.format(uid, output))
+                self.handler.server.gcm.send(
+                    PlainTextMessage(params["register"], {"message": ADMIN_SUCCESS_MSG}))
+                return 'registered={}\napproved={}'.format(uid, approved)
             # Check if already registered
             output = self.handler.server.db_mgr.execute(
                 '''
-                SELECT ID, GCM_KEY FROM DEVICES WHERE GCM_KEY="{}";
+                SELECT ID, GCM_KEY, APPROVED FROM DEVICES WHERE GCM_KEY="{}";
                 '''.format(params['register']))
             if len(output) > 0:
                 uid = output[0][0]
-                self.handler.server.gcm.send(
-                    PlainTextMessage(params["register"], {"message": ALREADY_REGISTERED_MSG}))
-                return 'registered={}'.format(uid)
+                approved = output[0][2]
+                if approved:
+                    self.handler.server.gcm.send(
+                        PlainTextMessage(params["register"], {"message": ALREADY_REGISTERED_MSG}))
+                else:
+                    self.handler.server.gcm.send(
+                        PlainTextMessage(params["register"], {"message": REGISTRATION_PENDING_MSG}))
+                return 'registered={}\napproved={}'.format(uid, approved)
 
             # Register new device
             uid = generate_id(6)
+            approved = 0
             output = self.handler.server.db_mgr.execute(
                 '''
                 INSERT INTO DEVICES (ID, GCM_KEY, CREATED_ON, APPROVED)
                 VALUES ({}, "{}", "{}", {});
-                '''.format(uid, params['register'], datetime.now(), 0)
+                '''.format(uid, params['register'], datetime.now(), approved)
             )
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
             self.handler.server.gcm.send(
-                PlainTextMessage(params["register"], {"message": REGISTRATION_SUCCESS_MSG}))
-            return 'registered={}'.format(uid)
-        elif 'ping' in params:
-            return 'pong\nstate={}'.format(self.handler.server.rpi.isLocked)
+                PlainTextMessage(params["register"], {"message": REGISTRATION_PENDING_MSG}))
+            return 'registered={}\napproved={}'.format(uid, approved)
 
         # UID Verification
         if 'uid' not in params:
@@ -73,17 +96,27 @@ class MessageHandler:
             self.log.error('Invalid uid={}, {}'.format(params['uid'], e))
             return 'Invalid UID'
 
+        # Check if UID recognized and if user is approved
+        output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES WHERE ID={}'.format(uid))
+        approved = 0
+        lock_state = LOCKED
+        if len(output) > 0:
+            self.log.info('UID [{}] recognized'.format(uid))
+            approved = output[0][1]
+            if approved:
+                # TODO lock_state = self.handler.server.rpi.isLocked
+                lock_state = UNLOCKED
+
+        # Return pong if ping recieved
+        if 'ping' in params:
+            return 'pong\nstate={}\napproved={}'.format(lock_state, approved)
+
         output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE ID={}'.format(uid))
-        if len(output) < 1:
-            self.log.error('UID [{}] not recognized'.format(uid))
-            return 'UID not recognized'
-
-        self.log.info('UID {} RECOGNIZED!!'.format(uid))  # TODO check if approved
-
-        # End-user commands
-        if 'lock_door' in params:
-            self.handler.server.rpi.lock_door()
-            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
-        elif 'unlock_door' in params:
-            self.handler.server.rpi.unlock_door()
-            return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
+        if len(output) > 0:
+            # End-user commands
+            if 'lock_door' in params:
+                self.handler.server.rpi.lock_door()
+                return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
+            elif 'unlock_door' in params:
+                self.handler.server.rpi.unlock_door()
+                return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
