@@ -84,32 +84,32 @@ class MessageHandler:
                 PlainTextMessage(params["register"], {"message": REGISTRATION_PENDING_MSG}))
             return 'registered={}\napproved={}'.format(uid, approved)
 
-        # UID Verification
-        if 'uid' not in params:
-            self.log.error('No device uid sent')
-            return 'UID not found'
-        try:
-            uid = int(params['uid'])
-        except TypeError, e:
-            self.log.error('Invalid uid={}, {}'.format(params['uid'], e))
-            return 'Invalid UID'
-
         # Check if UID recognized and if user is approved
-        output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES WHERE ID={};'.format(uid))
         approved = 0
         lock_state = LOCKED
-        if len(output) > 0:
-            self.log.info('UID [{}] recognized'.format(uid))
-            approved = output[0][1]
+        if 'uid' in params:
+            try:
+                uid = int(params['uid'])
+            except TypeError, e:
+                self.log.error('Invalid uid={}, {}'.format(params['uid'], e))
+                return 'Invalid UID'
+            output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES WHERE ID={};'.format(uid))
+            if len(output) > 0:
+                self.log.info('UID [{}] recognized'.format(uid))
+                approved = output[0][1]
 
         # Return pong if ping recieved
         if 'ping' in params:
             if approved:
-                # TODO lock_state = self.handler.server.rpi.isLocked
-                lock_state = UNLOCKED
+                lock_state = self.handler.server.rpi.isLocked
             return 'pong\nstate={}\napproved={}'.format(lock_state, approved)
 
-        elif approved:
+        # UID Verification
+        if 'uid' not in params:
+            self.log.error('No device uid sent')
+            return 'UID not found'
+
+        if approved:
             # End-user commands
             if 'lock_door' in params:
                 self.handler.server.rpi.lock_door()
