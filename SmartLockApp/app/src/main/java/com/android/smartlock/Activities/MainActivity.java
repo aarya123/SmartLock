@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
 
     private void scheduleLocator() {
         mScheduler = Executors.newScheduledThreadPool(1);
-        mScheduler.scheduleAtFixedRate(mPiPinger, 0, 10, TimeUnit.SECONDS);
+        mScheduler.scheduleAtFixedRate(mPiPinger, 0, 5, TimeUnit.SECONDS);
     }
 
     private void pauseLocator() {
