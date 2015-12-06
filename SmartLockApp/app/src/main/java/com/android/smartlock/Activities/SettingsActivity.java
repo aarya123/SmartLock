@@ -24,7 +24,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ipEditText = (EditText) findViewById(R.id.ipEditText);
-        ipEditText.setText(Constants.getIPAdress());
+        ipEditText.setText(Constants.getIPAddress());
         portEditText = (EditText) findViewById(R.id.portEditText);
         portEditText.setText(Constants.getPort() + "");
         timeoutEditText = (EditText) findViewById(R.id.timeoutEditText);
@@ -76,7 +76,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
         new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
         searchButton.setVisibility(View.VISIBLE);
         ipSearchProgress.setVisibility(View.GONE);
-        ipEditText.setText(Constants.getIPAdress());
+        ipEditText.setText(Constants.getIPAddress());
     }
 
     @Override

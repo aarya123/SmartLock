@@ -48,7 +48,7 @@ public class LocatePi extends AsyncTask<String, String, String> {
             e.printStackTrace();
         }
         Log.d("LocatePi", "No results :(");
-        return Constants.getIPAdress();
+        return Constants.getIPAddress();
     }
 
     @Override

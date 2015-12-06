@@ -13,7 +13,7 @@ public class UnlockDoor extends AsyncTask<String, String, String> {
     }
 
     protected String doInBackground(String... strings) {
-        String result = new Internet(Constants.getIPAdress(), "unlock_door", "true", "uid", Constants.getDeviceId()).getResult();
+        String result = new Internet(Constants.getIPAddress(), "unlock_door", "true", "uid", Constants.getDeviceId()).getResult();
         Log.d("UnlockDoor", result);
         return result;
     }

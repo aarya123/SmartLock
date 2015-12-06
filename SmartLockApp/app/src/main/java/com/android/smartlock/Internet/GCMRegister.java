@@ -25,9 +25,12 @@ public class GCMRegister extends AsyncTask<String, String, String> {
             String token = instanceID.getToken(context.getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.i(TAG, "GCM Registration Token: " + token);
-            Internet gcmsend = new Internet(Constants.getIPAdress(), "register", token);
-            Log.d(TAG, "Assigned id is " + gcmsend.getResult());
-            Constants.setDeviceId(gcmsend.getResult().split("=")[1]);
+            Internet gcmsend = new Internet(Constants.getIPAddress(), "register", token);
+            String[] result = gcmsend.getResult().split("\n");
+            Log.d(TAG, "Assigned id is " + result[0]);
+            Constants.setDeviceId(result[0].split("=")[1]);
+            Log.d(TAG, "Approved status is " + result[1]);
+            Constants.setApproved(Boolean.valueOf(result[1].split("=")[1]));
         } catch (Exception e) {
             Log.e(TAG, "Failed to complete token refresh", e);
         }
