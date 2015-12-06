@@ -4,7 +4,7 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
-from constants import ADMIN_SUCCESS_MSG, ALREADY_REGISTERED_MSG, REGISTRATION_PENDING_MSG, REGISTRATION_SUCCESS_MSG
+from constants import ADMIN_SUCCESS_MSG, APPROVAL_FAILED_MSG, ALREADY_REGISTERED_MSG, REGISTRATION_PENDING_MSG, REGISTRATION_SUCCESS_MSG
 from constants import LOCKED, UNLOCKED
 
 
@@ -70,8 +70,7 @@ class MessageHandler:
                     self.handler.server.gcm.send(
                         PlainTextMessage(params["register"], {"message": REGISTRATION_PENDING_MSG}))
                 return 'registered={}\napproved={}'.format(uid, approved)
-
-            # Register new device
+            # Register new unknown device
             uid = generate_id(6)
             approved = 0
             output = self.handler.server.db_mgr.execute(
@@ -89,7 +88,6 @@ class MessageHandler:
         if 'uid' not in params:
             self.log.error('No device uid sent')
             return 'UID not found'
-
         try:
             uid = int(params['uid'])
         except TypeError, e:
@@ -97,22 +95,21 @@ class MessageHandler:
             return 'Invalid UID'
 
         # Check if UID recognized and if user is approved
-        output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES WHERE ID={}'.format(uid))
+        output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES WHERE ID={};'.format(uid))
         approved = 0
         lock_state = LOCKED
         if len(output) > 0:
             self.log.info('UID [{}] recognized'.format(uid))
             approved = output[0][1]
-            if approved:
-                # TODO lock_state = self.handler.server.rpi.isLocked
-                lock_state = UNLOCKED
 
         # Return pong if ping recieved
         if 'ping' in params:
+            if approved:
+                # TODO lock_state = self.handler.server.rpi.isLocked
+                lock_state = UNLOCKED
             return 'pong\nstate={}\napproved={}'.format(lock_state, approved)
 
-        output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE ID={}'.format(uid))
-        if len(output) > 0:
+        elif approved:
             # End-user commands
             if 'lock_door' in params:
                 self.handler.server.rpi.lock_door()
@@ -120,3 +117,32 @@ class MessageHandler:
             elif 'unlock_door' in params:
                 self.handler.server.rpi.unlock_door()
                 return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
+            elif 'getunapproved' in params:
+                uid_list = ''
+                output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE APPROVED=0;')
+                for index, device in enumerate(output):
+                    if index > 0:
+                        uid_list += ','
+                    uid_list += str(device[0])
+                return uid_list
+            elif 'approve' in params:
+                approval_uid = params['approve']
+                self.log.info('Request to approve guest={} from uid={}'.format(uid, approval_uid))
+                output = self.handler.server.db_mgr.execute(
+                    '''
+                    UPDATE DEVICES SET APPROVED=1 WHERE ID={};
+                    '''.format(approval_uid))
+                if output == 0:
+                    self.log.error('Could not approve uid={}: UID not found!'.format(approval_uid))
+                    gcm_key = self.handler.server.db_mgr.getgcmkey(uid)
+                    self.handler.server.gcm.send(
+                        PlainTextMessage(gcm_key, {"message": APPROVAL_FAILED_MSG}))
+                    return 'failed'
+                output = self.handler.server.db_mgr.execute(
+                    '''
+                    SELECT GCM_KEY FROM DEVICES WHERE ID={};
+                    '''.format(approval_uid))
+                gcm_key = output[0][0]
+                self.handler.server.gcm.send(
+                    PlainTextMessage(gcm_key, {"message": REGISTRATION_SUCCESS_MSG}))
+                return 'success'

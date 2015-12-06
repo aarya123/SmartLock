@@ -44,6 +44,9 @@ class DatabaseConnector:
         self.log.debug('Execute complete {}'.format(output))
         return output
 
+    def getgcmkey(self, uid):
+        return self.execute('SELECT GCM_KEY FROM DEVICES WHERE ID={};'.format(uid))[0][0]
+
     def __del__(self, ):
         if self.db_conn:
             self.log.info('Closing connection')
