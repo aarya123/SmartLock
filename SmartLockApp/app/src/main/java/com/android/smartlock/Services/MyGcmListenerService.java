@@ -24,7 +24,10 @@ public class MyGcmListenerService extends GcmListenerService {
         if (!(message.equals("0") || message.equals("1"))) {
             sendNotification(message);
         } else {
-            //TODO: Update UI?
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null) {
+                mainActivity.setLock(message.equals("1"));
+            }
         }
     }
 

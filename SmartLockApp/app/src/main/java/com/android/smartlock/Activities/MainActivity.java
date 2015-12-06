@@ -19,10 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements AsyncTaskListener {
 
+    static MainActivity instance;
     Lock lockButton;
     ScheduledExecutorService mScheduler;
     PiPinger mPiPinger = new PiPinger(this);
     View registerButton;
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +55,20 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
 
     @Override
     protected void onResume() {
+        instance = this;
         scheduleLocator();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        instance = null;
         pauseLocator();
         super.onPause();
+    }
+
+    public void setLock(boolean status) {
+        lockButton.setLocked(status);
     }
 
     private void scheduleLocator() {
