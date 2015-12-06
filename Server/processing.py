@@ -74,7 +74,7 @@ class Server(HTTPServer):
 
     def notify_all(self, msg):
         for registered_gcm_key in self.db_mgr.execute('SELECT GCM_KEY FROM DEVICES'):
-            self.log.debug('Send doorbell pressed gcm: {}'.format(registered_gcm_key))
+            self.log.debug('Notfiy all via GCM: {}'.format(registered_gcm_key))
             self.gcm.send(
                     PlainTextMessage(registered_gcm_key, {'message': msg}))
 
