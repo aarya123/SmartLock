@@ -87,7 +87,6 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
 
     @Override
     public void onAsyncTaskCompleted() {
-        new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
         searchButton.setVisibility(View.VISIBLE);
         ipSearchProgress.setVisibility(View.GONE);
         ipEditText.setText(Constants.getIPAddress());
