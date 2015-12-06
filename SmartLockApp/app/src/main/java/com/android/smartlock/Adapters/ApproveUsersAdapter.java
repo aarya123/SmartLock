@@ -32,7 +32,7 @@ public class ApproveUsersAdapter extends ArrayAdapter<Integer> {
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.approve_user_cell, parent);
+            convertView = vi.inflate(R.layout.approve_user_cell, parent, false);
             holder = new ViewHolder();
             holder.uidTextView = (TextView) convertView.findViewById(R.id.uidTextView);
             holder.approveUserButton = (Button) convertView.findViewById(R.id.approveUserButton);
