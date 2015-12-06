@@ -9,10 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import com.android.smartlock.Constants;
 import com.android.smartlock.CustomViews.Lock;
-import com.android.smartlock.Internet.AsyncTaskListener;
-import com.android.smartlock.Internet.LockDoor;
-import com.android.smartlock.Internet.PiPinger;
-import com.android.smartlock.Internet.UnlockDoor;
+import com.android.smartlock.Internet.*;
 import com.android.smartlock.R;
 
 import java.util.concurrent.Executors;
@@ -25,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
     Lock lockButton;
     ScheduledExecutorService mScheduler;
     PiPinger mPiPinger = new PiPinger(this);
+    View registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +40,12 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
                 }
             }
         });
-
+        registerButton = findViewById(R.id.registerButton);
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new GCMRegister(MainActivity.this.getApplicationContext()).execute();
+            }
+        });
     }
 
     @Override
@@ -89,8 +92,16 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
         if (mPiPinger.isPiVisible()) {
             lockButton.setLocked(mPiPinger.isLocked());
             lockButton.setEnabled(Constants.isApproved());
+            if (!Constants.isApproved()) {
+                lockButton.setDisabledColor(0xff1565C0);
+                registerButton.setVisibility(View.VISIBLE);
+            } else {
+                registerButton.setVisibility(View.GONE);
+            }
         } else {
+            lockButton.setDisabledColor(0xff9e9e9e);
             lockButton.setEnabled(false);
+            registerButton.setVisibility(View.GONE);
         }
     }
 

@@ -1,8 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:padding="16dp"
-              android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp"
+                android:orientation="vertical">
 
     <com.android.smartlock.CustomViews.Lock
             android:layout_width="wrap_content"
@@ -10,4 +10,9 @@
             android:layout_gravity="center"
             android:id="@+id/lockButton"/>
 
-</LinearLayout>
+    <View android:layout_width="fill_parent"
+          android:layout_height="fill_parent"
+          android:id="@+id/registerButton"
+          android:visibility="gone"/>
+
+</RelativeLayout>
