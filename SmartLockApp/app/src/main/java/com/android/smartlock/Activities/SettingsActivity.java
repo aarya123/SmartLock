@@ -1,5 +1,6 @@
 package com.android.smartlock.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -16,7 +17,7 @@ import com.android.smartlock.R;
 
 public class SettingsActivity extends AppCompatActivity implements AsyncTaskListener {
     EditText ipEditText, portEditText, timeoutEditText;
-    Button searchButton, registerButton;
+    Button searchButton, registerButton, approveUsers;
     ProgressBar ipSearchProgress;
 
     @Override
@@ -47,6 +48,19 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
             }
         });
         ipSearchProgress = (ProgressBar) findViewById(R.id.ipSearchProgress);
+        approveUsers = (Button) findViewById(R.id.approveUsers);
+        if (Constants.isApproved()) {
+            approveUsers.setVisibility(View.VISIBLE);
+        } else {
+            approveUsers.setVisibility(View.GONE);
+        }
+        approveUsers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SettingsActivity.this, ApproveUsersActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -73,7 +87,6 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
 
     @Override
     public void onAsyncTaskCompleted() {
-        new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
         searchButton.setVisibility(View.VISIBLE);
         ipSearchProgress.setVisibility(View.GONE);
         ipEditText.setText(Constants.getIPAddress());
