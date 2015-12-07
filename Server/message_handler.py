@@ -4,7 +4,8 @@ from datetime import datetime
 from device import generate_id
 from gcmclient import PlainTextMessage
 
-from constants import ADMIN_SUCCESS_MSG, APPROVAL_FAILED_MSG, ALREADY_REGISTERED_MSG, REGISTRATION_PENDING_MSG, REGISTRATION_SUCCESS_MSG
+from constants import ADMIN_SUCCESS_MSG, APPROVAL_FAILED_MSG, ALREADY_REGISTERED_MSG, NEW_PENDING_USER_MSG
+from constants import REGISTRATION_PENDING_MSG, REGISTRATION_SUCCESS_MSG, REGISTRATION_UNAPPROVED_MSG, UNAPPROVAL_FAILED_MSG
 from constants import LOCKED, UNLOCKED
 
 
@@ -82,6 +83,14 @@ class MessageHandler:
             self.log.debug('Insert new request for access: {}, {}'.format(uid, output))
             self.handler.server.gcm.send(
                 PlainTextMessage(params["register"], {"message": REGISTRATION_PENDING_MSG}))
+            output = self.handler.server.db_mgr.execute(
+                '''
+                SELECT GCM_KEY FROM DEVICES WHERE APPROVED=1;
+                '''
+            )
+            for gcm_key in output:
+                self.handler.server.gcm.send(
+                    PlainTextMessage(gcm_key, {"message": NEW_PENDING_USER_MSG}))
             return 'registered={}\napproved={}'.format(uid, approved)
 
         # Check if UID recognized and if user is approved
@@ -111,23 +120,24 @@ class MessageHandler:
 
         if approved:
             # End-user commands
+            uid = params['uid']
             if 'lock_door' in params:
                 self.handler.server.rpi.lock_door()
                 return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
             elif 'unlock_door' in params:
                 self.handler.server.rpi.unlock_door()
                 return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
-            elif 'getunapproved' in params:
+            elif 'getusers' in params:
                 uid_list = ''
-                output = self.handler.server.db_mgr.execute('SELECT ID FROM DEVICES WHERE APPROVED=0;')
+                output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES;')
                 for index, device in enumerate(output):
                     if index > 0:
                         uid_list += ','
-                    uid_list += str(device[0])
+                    uid_list += str(device[0]) + ':' + str(device[1])
                 return uid_list
             elif 'approve' in params:
                 approval_uid = params['approve']
-                self.log.info('Request to approve guest={} from uid={}'.format(uid, approval_uid))
+                self.log.info('Request to approve guest={} from uid={}'.format(approval_uid, uid))
                 output = self.handler.server.db_mgr.execute(
                     '''
                     UPDATE DEVICES SET APPROVED=1 WHERE ID={};
@@ -145,4 +155,25 @@ class MessageHandler:
                 gcm_key = output[0][0]
                 self.handler.server.gcm.send(
                     PlainTextMessage(gcm_key, {"message": REGISTRATION_SUCCESS_MSG}))
+                return 'success'
+            elif 'unapprove' in params:
+                approval_uid = params['unapprove']
+                self.log.info('Request to unapprove guest={} from uid={}'.format(approval_uid, uid))
+                output = self.handler.server.db_mgr.execute(
+                    '''
+                    UPDATE DEVICES SET APPROVED=0 WHERE ID={};
+                    '''.format(approval_uid))
+                if output == 0:
+                    self.log.error('Could not unapprove uid={}: UID not found!'.format(approval_uid))
+                    gcm_key = self.handler.server.db_mgr.getgcmkey(uid)
+                    self.handler.server.gcm.send(
+                        PlainTextMessage(gcm_key, {"message": UNAPPROVAL_FAILED_MSG}))
+                    return 'failed'
+                output = self.handler.server.db_mgr.execute(
+                    '''
+                    SELECT GCM_KEY FROM DEVICES WHERE ID={};
+                    '''.format(approval_uid))
+                gcm_key = output[0][0]
+                self.handler.server.gcm.send(
+                    PlainTextMessage(gcm_key, {"message": REGISTRATION_UNAPPROVED_MSG}))
                 return 'success'
