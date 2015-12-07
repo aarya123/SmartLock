@@ -35,7 +35,7 @@ public class LocatePi extends AsyncTask<String, String, String> {
                 InetAddress address = InetAddress.getByAddress(ip);
                 if (address.isReachable(100)) {
                     String ipString = address.toString().replace("/", "");
-                    String response = new Internet(ipString, "ping", Constants.getPublicKeyString()).getResult();
+                    String response = new Internet(ipString, "ping", "true").getResult();
                     if (response.contains("pong")) {
                         publishProgress("1.0");
                         Log.d("LocatePi", "Found server at " + ipString);
