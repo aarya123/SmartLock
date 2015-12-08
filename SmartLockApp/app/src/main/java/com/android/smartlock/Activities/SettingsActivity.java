@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import com.android.smartlock.Constants;
 import com.android.smartlock.Internet.AsyncTaskListener;
 import com.android.smartlock.Internet.GCMRegister;
@@ -19,6 +20,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
     EditText ipEditText, portEditText, timeoutEditText;
     Button searchButton, registerButton, approveUsers;
     ProgressBar ipSearchProgress;
+    TextView deviceIdTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,7 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
             @Override
             public void onClick(View v) {
                 new GCMRegister(SettingsActivity.this.getApplicationContext()).execute();
+                finish();
             }
         });
         searchButton = (Button) findViewById(R.id.searchButton);
@@ -51,7 +54,9 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
         approveUsers = (Button) findViewById(R.id.approveUsers);
         if (Constants.isApproved()) {
             approveUsers.setVisibility(View.VISIBLE);
+            registerButton.setVisibility(View.GONE);
         } else {
+            registerButton.setVisibility(View.VISIBLE);
             approveUsers.setVisibility(View.GONE);
         }
         approveUsers.setOnClickListener(new View.OnClickListener() {
@@ -61,6 +66,8 @@ public class SettingsActivity extends AppCompatActivity implements AsyncTaskList
                 startActivity(intent);
             }
         });
+        deviceIdTextView = (TextView) findViewById(R.id.deviceIdTextView);
+        deviceIdTextView.setText(Constants.getDeviceId());
     }
 
     @Override
