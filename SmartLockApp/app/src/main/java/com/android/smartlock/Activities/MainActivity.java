@@ -101,15 +101,17 @@ public class MainActivity extends AppCompatActivity implements AsyncTaskListener
     public void onAsyncTaskCompleted() {
         Log.d("Main", "Triggered!");
         if (mPiPinger.isPiVisible()) {
-            lockButton.setLocked(mPiPinger.isLocked());
             lockButton.setEnabled(Constants.isApproved());
-            if (!Constants.isApproved()) {
+            if (Constants.isApproved()) {
+                lockButton.setLocked(mPiPinger.isLocked());
+                registerButton.setVisibility(View.GONE);
+            } else {
+                lockButton.setLocked(true);
                 lockButton.setDisabledColor(0xff1565C0);
                 registerButton.setVisibility(View.VISIBLE);
-            } else {
-                registerButton.setVisibility(View.GONE);
             }
         } else {
+            lockButton.setLocked(true);
             lockButton.setDisabledColor(0xff9e9e9e);
             lockButton.setEnabled(false);
             registerButton.setVisibility(View.GONE);
