@@ -122,13 +122,11 @@ class MessageHandler:
             # End-user commands
             uid = params['uid']
             if 'lock_door' in params:
-                notify = not self.handler.server.notify_all(self.handler.server.rpi.isLocked)
                 self.handler.server.rpi.lock_door()
-                return notify
+                return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
             elif 'unlock_door' in params:
-                notify = not self.handler.server.notify_all(self.handler.server.rpi.isLocked)
                 self.handler.server.rpi.unlock_door()
-                return notify
+                return self.handler.server.notify_all(self.handler.server.rpi.isLocked)
             elif 'getusers' in params:
                 uid_list = ''
                 output = self.handler.server.db_mgr.execute('SELECT ID, APPROVED FROM DEVICES;')
